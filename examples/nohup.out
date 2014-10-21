@@ -10829,3 +10829,6 @@ Traceback (most recent call last):
   File "/usr/local/lib/python2.7/site-packages/tornado/concurrent.py", line 111, in result
     raise self._exception
 SSLError: [Errno 1] _ssl.c:510: error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request
+2014-10-20 23:47:08.565 [NotebookApp] CRITICAL | received signal 15, stopping
+2014-10-20 23:47:08.566 [NotebookApp] Shutting down kernels
+2014-10-20 23:47:08.983 [NotebookApp] Kernel shutdown: b828491d-c728-40ed-92b8-0ded1a48e39c

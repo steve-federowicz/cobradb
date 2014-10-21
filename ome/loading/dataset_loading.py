@@ -1025,7 +1025,7 @@ def load_cuffdiff(group_name):
 
 
 @timing
-def load_gem(chip_peak_analyses, base, datasets, genome):
+def load_gem(chip_peak_analyses, base, datasets, chromosome):
     gem_path = settings.data_directory+'/chip_peaks/gem/'
     session = base.Session()
     for chip_peak_analysis in chip_peak_analyses:
@@ -1035,10 +1035,11 @@ def load_gem(chip_peak_analyses, base, datasets, genome):
         except: continue
         for line in gem_peak_file.readlines():
             vals = line.split('\t')
-
+            print vals
             position = int(vals[3].split(':')[1])
 
-            peak_region = session.get_or_create(base.GenomeRegion, leftpos=vals[1], rightpos=vals[2], strand='+', genome_id=genome.id)
+            peak_region = session.get_or_create(base.GenomeRegion, name='%s_%s-%s_%d' % ('peak',vals[1],vals[2],chip_peak_analysis.id),
+                                                                   leftpos=vals[1], rightpos=vals[2], strand='+', chromosome_id=chromosome.id)
 
             peak_data = session.get_or_create(datasets.ChIPPeakData, dataset_id=chip_peak_analysis.id, genome_region_id=peak_region.id,\
                                                 value=vals[6], eventpos=position, pval=vals[8])
