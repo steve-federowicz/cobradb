@@ -47,13 +47,13 @@ if __name__ == "__main__":
             component_loading.write_chromosome_annotation_gff(base, components, chromosome)
 
 
-            dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/bam/crp', group_name='crp', normalize=normalize_flag, raw=raw_flag)
-            dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/bam/yome', group_name='yome', normalize=normalize_flag, raw=raw_flag)
+            dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/fastq/crp', group_name='crp', normalize=normalize_flag, raw=raw_flag, debug=False)
+            #dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/bam/yome', group_name='yome', normalize=normalize_flag, raw=raw_flag)
 
             dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/gff', group_name='trn', normalize=False, raw=raw_flag)
 
             dataset_loading.load_raw_files(settings.data_directory+'rnaseq_experiment/fastq/crp', group_name='crp', normalize=False, raw=False)
-            dataset_loading.load_raw_files(settings.data_directory+'rnaseq_experiment/fastq/yome', group_name='yome', normalize=False, raw=False)
+            #dataset_loading.load_raw_files(settings.data_directory+'rnaseq_experiment/fastq/yome', group_name='yome', normalize=False, raw=False)
             #dataset_loading.load_raw_files(settings.data_directory+'rnaseq_experiment/bam', normalize=True)
             #dataset_loading.load_raw_files(settings.data_directory+'chip_experiment/bam', normalize=False)
             dataset_loading.load_raw_files(settings.data_directory+'microarray/asv2', group_name='asv2', raw=False)
@@ -76,10 +76,12 @@ if __name__ == "__main__":
             #dataset_loading.run_cuffnorm(base, datasets, genome, group_name='yome', debug=False, overwrite=True)
             #dataset_loading.run_cuffdiff(base, datasets, genome, group_name='crp', gff_file=old_gff_file, debug=False, overwrite=True)
             #dataset_loading.run_cuffdiff(base, datasets, genome, group_name='yome', debug=False, overwrite=True)
-            #dataset_loading.run_gem(base, datasets, genome, debug=True)
 
-            for gem_peaks in session.query(datasets.ChIPPeakAnalysis).join(datasets.Strain).filter(datasets.Strain.name == 'Crp8myc').all():
-                dataset_loading.load_gem([gem_peaks], base, datasets, chromosome)
+
+            for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).join(datasets.Strain).filter(datasets.Strain.name == 'Crp8myc').all()[0:1]:
+                #from IPython import embed; embed()
+                dataset_loading.run_gem(chip_peak_analysis, base, datasets, genome, debug=False, overwrite=False)
+                dataset_loading.load_gem(chip_peak_analysis, base, datasets, chromosome)
 
             """
             dataset_loading.load_gff_chip_peaks(session.query(datasets.ChIPPeakAnalysis).all(), base, datasets, genome, group_name='gff-BK')

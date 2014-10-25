@@ -287,7 +287,7 @@ def calculate_normalization_factors(experiment_type, group_name):
 
 
 @timing
-def load_raw_files(directory_path, group_name='default', normalize=True, overwrite=False, raw=True):
+def load_raw_files(directory_path, group_name='default', normalize=True, overwrite=False, debug=False, raw=True):
     """This will load raw .bam files, .gff files, and affymetrix .CEL files into the associated
     genome_data tables.  A genome object must also be supplied for proper mappping. The raw signal
     will go into a mongoDB genome_data table and the rest will go into corresponding SQL tables.
@@ -336,7 +336,7 @@ def load_raw_files(directory_path, group_name='default', normalize=True, overwri
 
     for experiment in set(experiments):
       if experiment.name in fastq_experiment_paths.keys():
-          run_bowtie2(experiment, fastq_experiment_paths[experiment.name], overwrite=overwrite, debug=True)
+          run_bowtie2(experiment, fastq_experiment_paths[experiment.name], overwrite=overwrite, debug=debug)
 
 
     if normalize:
@@ -531,18 +531,18 @@ def run_bowtie2(experiment, fastq_paths, overwrite=False, debug=False):
     """
 
     if experiment.group_name == 'default':
-        bam_file_path = settings.data_directory+'/'+experiment.type+'/bam/'+experiment.name
-        fastq_dir_path = settings.data_directory+'/'+experiment.type+'/fastq/'
+        bam_file_path = settings.data_directory+experiment.type+'/bam/'+experiment.name
+        fastq_dir_path = settings.data_directory+experiment.type+'/fastq/'
     else:
-        bam_file_path = settings.data_directory+'/'+experiment.type+'/bam/'+experiment.group_name+'/'+experiment.name
-        fastq_dir_path = settings.data_directory+'/'+experiment.type+'/fastq/'+experiment.group_name+'/'
+        bam_file_path = settings.data_directory+experiment.type+'/bam/'+experiment.group_name+'/'+experiment.name
+        fastq_dir_path = settings.data_directory+experiment.type+'/fastq/'+experiment.group_name+'/'
 
-    if os.path.isfile(bam_file_path+'.bam') and overwrite:
-        os.remove(bam_file_path+'.bam')
-    elif os.path.isfile(bam_file_path+'.bam'): return
+    #if os.path.isfile(bam_file_path+'.bam') and overwrite:
+    #    os.remove(bam_file_path+'.bam')
+    #elif os.path.isfile(bam_file_path+'.bam'): return
 
     """Check for proper bowtie2 index and if not build it"""
-    genbank_dir = settings.data_directory+'/annotation/genbank/'
+    genbank_dir = settings.data_directory+'annotation/genbank/'
     os.chdir(genbank_dir)
 
     if not os.path.isfile(genbank_dir+'/NC_000913.2.1.bt2'):
@@ -555,8 +555,15 @@ def run_bowtie2(experiment, fastq_paths, overwrite=False, debug=False):
         if suffix[0:2] == 'R1': R1_list.append(path)
         elif suffix[0:2] == 'R2': R2_list.append(path)
 
+    try:
+        if experiment.protocol_type == 'ChIPExo' and len(R1_list+R2_list) != 0:
+            ChIPExo_flag = True
+            fastq_paths = R1_list
+    except: ChIPExo_flag = False
+
     #print fastq_paths
-    if len(R1_list+R2_list) == 0: #unpaired
+    if len(R1_list+R2_list) == 0 or ChIPExo_flag: #unpaired
+
         bowtie_string = "bowtie2 -N %d -p %d -x %s -U %s | samtools view -bS - | samtools sort - %s" % \
                                    (1, 8, 'NC_000913.2', ','.join([fastq_dir_path+x for x in fastq_paths]), bam_file_path)
     else: #paired
@@ -565,18 +572,24 @@ def run_bowtie2(experiment, fastq_paths, overwrite=False, debug=False):
                                                          ','.join([fastq_dir_path+x for x in R2_list]), bam_file_path)
 
     if debug:
-      print bowtie_string
-    else:
-      print bowtie_string
-      os.system(bowtie_string)
+        print bowtie_string
+        return
 
+    if os.path.isfile(bam_file_path+'.bam') and overwrite:
+        os.remove(bam_file_path+'.bam')
+        print bowtie_string
+        os.system(bowtie_string)
+
+    elif not os.path.isfile(bam_file_path+'.bam'):
+        print bowtie_string
+        os.system(bowtie_string)
 
 @timing
 def run_cuffquant(base, datasets, genome, group_name=None, overwrite=False, debug=False):
 
 
-    gff_file = settings.data_directory+'/annotation/'+genome.ncbi_id+'_'+group_name+'.gff'
-    cxb_dir = settings.data_directory+'/rnaseq_experiment/cxb/'+group_name
+    gff_file = settings.data_directory+'annotation/'+genome.ncbi_id+'_'+group_name+'.gff'
+    cxb_dir = settings.data_directory+'rnaseq_experiment/cxb/'+group_name
 
     if not os.path.exists(cxb_dir):
         os.mkdir(cxb_dir)
@@ -587,7 +600,7 @@ def run_cuffquant(base, datasets, genome, group_name=None, overwrite=False, debu
 
         out_path = cxb_dir+'/'+experiment.name
 
-        exp_file = settings.data_directory+'/rnaseq_experiment/bam/'+experiment.group_name+'/'+experiment.name+'.bam'
+        exp_file = settings.data_directory+'rnaseq_experiment/bam/'+experiment.group_name+'/'+experiment.name+'.bam'
 
         cuffquant_string = '%s -p %d -v --library-type fr-firststrand %s %s' % (settings.cufflinks+'/cuffquant', 8, gff_file, exp_file)
 
@@ -614,10 +627,10 @@ def run_cuffquant(base, datasets, genome, group_name=None, overwrite=False, debu
 def run_cuffnorm(base, datasets, genome, group_name, gff_file=None, debug=False, overwrite=False):
 
     if not gff_file:
-        gff_file = settings.data_directory+'/annotation/'+genome.ncbi_id+'.gff'
+        gff_file = settings.data_directory+'annotation/'+genome.ncbi_id+'.gff'
 
-    cxb_dir = settings.data_directory+'/rnaseq_experiment/cxb/'+group_name
-    out_path = settings.data_directory+'/rnaseq_experiment/cuffnorm/'+group_name
+    cxb_dir = settings.data_directory+'rnaseq_experiment/cxb/'+group_name
+    out_path = settings.data_directory+'rnaseq_experiment/cuffnorm/'+group_name
 
     session = base.Session()
     experiments = session.query(func.array_agg(datasets.RNASeqExperiment.name)).\
@@ -833,66 +846,84 @@ def run_array_ttests(base, datasets, genome, group_name, debug=False, overwrite=
 
 
 @timing
-def run_gem(base, datasets, genome, debug=False, overwrite=False, with_control=False):
+def run_gem(chip_peak_analysis, base, datasets, genome, debug=False, overwrite=False, with_control=False):
+
+
+    if chip_peak_analysis.children[0].protocol_type not in ['ChIPExo','ChIPSeq']: return
+
     default_parameters = {'mrc':20, 'smooth':3, 'nrf':'', 'outNP':''}
     gem_path = settings.home_directory+'/libraries/gem'
-    bam_dir = settings.data_directory+'/chip_experiment/bam/'
+    bam_dir = settings.data_directory+'chip_experiment/bam/'
 
     session = base.Session()
 
-    for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).all():
+    #for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).all():
 
-        outdir = chip_peak_analysis.name
-        out_path = settings.data_directory+'/chip_peaks/gem/'+outdir
-
-
-        input_files = ' '.join(['--expt'+x.name+' '+bam_dir+x.group_name+'/'+x.name+'.bam' for x in chip_peak_analysis.children])
+    outdir = chip_peak_analysis.name
+    out_path = settings.data_directory+'chip_peaks/gem/'+outdir
 
 
-        #control_peak_analysis = session.query(ChIPPeakAnalysis).join(AnalysisComposition, ChIPPeakAnalysis.id == AnalysisComposition.analysis_id).\
-        #                                                        join(ChIPExperiment, ChIPExperiment.id == AnalysisComposition.dataset_id).\
-        #                                                        join(Strain).\
-        #                                                        filter(and_(Strain.name == 'delta-crp',
-        #                                                                    ChIPExperiment.antibody == 'anti-crp')).one()
-
-        if with_control:
-            from random import randint
-            """since every replicate needs a corresponding control replicate for GEMs and since we might have less or more
-               control replicates than experimental replicates, we are going to randomly sample from the set of control
-               replicates for each experimental replicate.  This should be fine because control replicates should be random
-               noise anyways. However, if specific control replicates are generated this function needs to be changed.
-            """
-            control_input_files = ' '.join(['--ctrl'+x.name+' '+bam_dir+control_chip_peak_analysis.children[randint(0,len(control_chip_peak_analysis.children))].file_name for i,x in enumerate(chip_peak_analysis.children)])
-        else:
-            control_input_files = ''
+    input_files = ' '.join(['--expt'+x.name+' '+bam_dir+x.group_name+'/'+x.name+'.bam' for x in chip_peak_analysis.children])
 
 
-        params = json.loads(chip_peak_analysis.parameters)
-        parameter_string = ' '.join(['--'+y+' '+str(z) for y,z in params.iteritems()])
+    #control_peak_analysis = session.query(ChIPPeakAnalysis).join(AnalysisComposition, ChIPPeakAnalysis.id == AnalysisComposition.analysis_id).\
+    #                                                        join(ChIPExperiment, ChIPExperiment.id == AnalysisComposition.dataset_id).\
+    #                                                        join(Strain).\
+    #                                                        filter(and_(Strain.name == 'delta-crp',
+    #                                                                    ChIPExperiment.antibody == 'anti-crp')).one()
+
+    if with_control:
+        from random import randint
+        """since every replicate needs a corresponding control replicate for GEMs and since we might have less or more
+           control replicates than experimental replicates, we are going to randomly sample from the set of control
+           replicates for each experimental replicate.  This should be fine because control replicates should be random
+           noise anyways. However, if specific control replicates are generated this function needs to be changed.
+        """
+        control_input_files = ' '.join(['--ctrl'+x.name+' '+bam_dir+control_chip_peak_analysis.children[randint(0,len(control_chip_peak_analysis.children))].file_name for i,x in enumerate(chip_peak_analysis.children)])
+    else:
+        control_input_files = ''
 
 
-        gem_string = "java -Xmx5G -jar %s/gem.jar --d %s/Read_Distribution_ChIP-exo.txt --g %s --genome %s %s %s --f SAM %s" %\
-                     (gem_path, gem_path, settings.data_directory+'/annotation/ec_mg1655.sizes', settings.data_directory+'/annotation',\
-                     input_files, control_input_files, parameter_string)
-
-        if debug:
-            print gem_string
-            continue
+    params = json.loads(chip_peak_analysis.parameters)
+    parameter_string = ' '.join(['--'+y+' '+str(z) for y,z in params.iteritems()])
 
 
-        if os.path.exists(out_path) and overwrite:
-            os.system('rm -r '+out_path)
-            os.mkdir(out_path)
-            os.chdir(out_path)
-            os.system(gem_string)
+    gem_string = "java -Xmx5G -jar %s/gem.jar --d %s/Read_Distribution_ChIP-exo.txt --g %s --genome %s %s %s --f SAM %s" %\
+                 (gem_path, gem_path, settings.data_directory+'annotation/ec_mg1655.sizes', settings.data_directory+'annotation',\
+                  input_files, control_input_files, parameter_string)
 
-        elif not os.path.exists(out_path):
-            os.mkdir(out_path)
-            os.chdir(out_path)
-            os.system(gem_string)
+    if debug:
+        print gem_string
+        return
 
-            gem_peak_file = open(out_path+'/out_GPS_events.narrowPeak','r')
-            with open(out_path+'/'+chip_peak_analysis.name+'_gps.gff', 'wb') as peaks_gff_file:
+
+    if os.path.exists(out_path) and overwrite:
+        os.system('rm -r '+out_path)
+        os.mkdir(out_path)
+        os.chdir(out_path)
+        os.system(gem_string)
+
+    elif not os.path.exists(out_path):
+        os.mkdir(out_path)
+        os.chdir(out_path)
+        os.system(gem_string)
+
+        gem_peak_file = open(out_path+'/out_GPS_events.narrowPeak','r')
+        with open(out_path+'/'+chip_peak_analysis.name+'_gps.gff', 'wb') as peaks_gff_file:
+
+            for line in gem_peak_file.readlines():
+                vals = line.split('\t')
+
+                position = int(vals[3].split(':')[1])
+
+                peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
+                                     ('NC_000913','.', chip_peak_analysis.name+'_gps', position-1, position+1, float(vals[6])*3.2, '+', '.','.'))
+                peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
+                                     ('NC_000913','.', chip_peak_analysis.name+'_gps', vals[1], vals[2], float(vals[6]), '+', '.','.'))
+
+        try:
+            gem_peak_file = open(out_path+'/out_GEM_events.narrowPeak','r')
+            with open(out_path+'/'+chip_peak_analysis.name+'_gem.gff', 'wb') as peaks_gff_file:
 
                 for line in gem_peak_file.readlines():
                     vals = line.split('\t')
@@ -900,24 +931,10 @@ def run_gem(base, datasets, genome, debug=False, overwrite=False, with_control=F
                     position = int(vals[3].split(':')[1])
 
                     peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
-                                         ('NC_000913','.', chip_peak_analysis.name+'_gps', position-1, position+1, float(vals[6])*3.2, '+', '.','.'))
+                                         ('NC_000913','.', chip_peak_analysis.name+'_gem', position-1, position+1, float(vals[6])*3.2, '+', '.','.'))
                     peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
-                                         ('NC_000913','.', chip_peak_analysis.name+'_gps', vals[1], vals[2], float(vals[6]), '+', '.','.'))
-
-            try:
-                gem_peak_file = open(out_path+'/out_GEM_events.narrowPeak','r')
-                with open(out_path+'/'+chip_peak_analysis.name+'_gem.gff', 'wb') as peaks_gff_file:
-
-                    for line in gem_peak_file.readlines():
-                        vals = line.split('\t')
-
-                        position = int(vals[3].split(':')[1])
-
-                        peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
-                                             ('NC_000913','.', chip_peak_analysis.name+'_gem', position-1, position+1, float(vals[6])*3.2, '+', '.','.'))
-                        peaks_gff_file.write('%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s\n' %\
-                                             ('NC_000913','.', chip_peak_analysis.name+'_gem', vals[1], vals[2], float(vals[6]), '+', '.','.'))
-            except: None
+                                         ('NC_000913','.', chip_peak_analysis.name+'_gem', vals[1], vals[2], float(vals[6]), '+', '.','.'))
+        except: None
 
 
     session.close()
@@ -1025,23 +1042,23 @@ def load_cuffdiff(group_name):
 
 
 @timing
-def load_gem(chip_peak_analyses, base, datasets, chromosome):
+def load_gem(chip_peak_analysis, base, datasets, chromosome):
     gem_path = settings.data_directory+'/chip_peaks/gem/'
     session = base.Session()
-    for chip_peak_analysis in chip_peak_analyses:
-        if chip_peak_analysis.children[0].protocol_type == 'ChIPchip': continue
 
-        try: gem_peak_file = open(gem_path+chip_peak_analysis.name+'/out_GPS_events.narrowPeak','r')
-        except: continue
-        for line in gem_peak_file.readlines():
-            vals = line.split('\t')
-            print vals
-            position = int(vals[3].split(':')[1])
+    if chip_peak_analysis.children[0].protocol_type == 'ChIPchip': return
 
-            peak_region = session.get_or_create(base.GenomeRegion, name='%s_%s-%s_%d' % ('peak',vals[1],vals[2],chip_peak_analysis.id),
-                                                                   leftpos=vals[1], rightpos=vals[2], strand='+', chromosome_id=chromosome.id)
+    try: gem_peak_file = open(gem_path+chip_peak_analysis.name+'/out_GPS_events.narrowPeak','r')
+    except: return
+    for line in gem_peak_file.readlines():
+        vals = line.split('\t')
 
-            peak_data = session.get_or_create(datasets.ChIPPeakData, dataset_id=chip_peak_analysis.id, genome_region_id=peak_region.id,\
+        position = int(vals[3].split(':')[1])
+
+        peak_region = session.get_or_create(base.GenomeRegion, name='%s_%s-%s_%d' % ('peak',vals[1],vals[2],chip_peak_analysis.id),
+                                                               leftpos=vals[1], rightpos=vals[2], strand='+', chromosome_id=chromosome.id)
+
+        peak_data = session.get_or_create(datasets.ChIPPeakData, dataset_id=chip_peak_analysis.id, genome_region_id=peak_region.id,\
                                                 value=vals[6], eventpos=position, pval=vals[8])
 
     session.close()
