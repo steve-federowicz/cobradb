@@ -13,11 +13,11 @@ import os
 
 
 if __name__ == "__main__":
+
+    #if not dataset_loading.query_yes_no('This will drop the ENTIRE database and load from scratch, ' + \
+    #                    'are you sure you want to do this?'): sys.exit()
+
     """
-    if not dataset_loading.query_yes_no('This will drop the ENTIRE database and load from scratch, ' + \
-                        'are you sure you want to do this?'): sys.exit()
-
-
     base.Base.metadata.drop_all()
     base.Base.metadata.create_all()
 
@@ -31,15 +31,15 @@ if __name__ == "__main__":
         if genbank_file not in ['NC_000913.2.gb']: continue
 
         component_loading.load_genome(genbank_file, base, components, debug=False)
-
     """
+
     session = base.Session()
 
     data_genomes = session.query(base.Genome).filter(base.Genome.bioproject_id.in_(['PRJNA57779'])).all()
 
 
-    raw_flag = False
-    normalize_flag = False
+    raw_flag = True
+    normalize_flag = True
 
     for genome in data_genomes:
 
@@ -63,11 +63,11 @@ if __name__ == "__main__":
             experiment_sets = dataset_loading.query_experiment_sets()
             dataset_loading.load_experiment_sets(experiment_sets)
 
-            """
+
             component_loading.load_metacyc_proteins(base, components, chromosome)
             component_loading.load_metacyc_bindsites(base, components, chromosome)
             component_loading.load_metacyc_transcription_units(base, components, chromosome)
-            """
+
 
             old_gff_file = settings.data_directory+'/annotation/NC_000913.2_old.gff'
 
@@ -78,12 +78,11 @@ if __name__ == "__main__":
             #dataset_loading.run_cuffdiff(base, datasets, genome, group_name='yome', debug=False, overwrite=True)
 
 
-            for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).join(datasets.Strain).filter(datasets.Strain.name == 'Crp8myc').all()[0:1]:
-                #from IPython import embed; embed()
-                dataset_loading.run_gem(chip_peak_analysis, base, datasets, genome, debug=False, overwrite=False)
+            for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).join(datasets.Strain).filter(datasets.Strain.name == 'Crp8myc').all():
+                #dataset_loading.run_gem(chip_peak_analysis, base, datasets, genome, extra_parameters={"q": 1.3}, debug=False, overwrite=False)
                 dataset_loading.load_gem(chip_peak_analysis, base, datasets, chromosome)
 
-            """
+
             dataset_loading.load_gff_chip_peaks(session.query(datasets.ChIPPeakAnalysis).all(), base, datasets, genome, group_name='gff-BK')
 
             dataset_loading.load_extra_analyses(base, datasets, genome, settings.data_directory+'/ChIP_peaks/gps-curated-HL28Aug14', group_name='gps-curated-HL28Aug14')
@@ -92,9 +91,9 @@ if __name__ == "__main__":
             component_loading.load_kegg_pathways(base, components)
 
             dataset_loading.load_cuffnorm(base, datasets, group_name='crp')
-            dataset_loading.load_cuffnorm(base, datasets, group_name='yome')
+            #dataset_loading.load_cuffnorm(base, datasets, group_name='yome')
             dataset_loading.load_cuffdiff(group_name='crp')
-            dataset_loading.load_cuffdiff(group_name='yome')
+            #dataset_loading.load_cuffdiff(group_name='yome')
 
             dataset_loading.load_arraydata(settings.data_directory+'/microarray/formatted_asv2.txt', group_name='asv2')
             dataset_loading.load_arraydata(settings.data_directory+'/microarray/formatted_ec2.txt', group_name='ec2')
@@ -102,8 +101,9 @@ if __name__ == "__main__":
             dataset_loading.run_array_ttests(base, datasets, genome, group_name='asv2')
             dataset_loading.run_array_ttests(base, datasets, genome, group_name='ec2')
 
+
             dataset_loading.make_genome_region_map(base, datasets, genome)
-            """
+
 
 
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         for line in file:
             model_id,genome_id,model_creation_timestamp = line.rstrip('\n').split(',')
 
-           # model_loading.load_model(model_id, genome_id, model_creation_timestamp)
+            #model_loading.load_model(model_id, genome_id, model_creation_timestamp)
 
 
     #print session.query(datasets.ChIPPeakData).all()

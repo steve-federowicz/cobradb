@@ -447,8 +447,8 @@ class ChIPPeakData(GenomeData):
     __mapper_args__ = { 'polymorphic_identity': 'chip_peak_data' }
 
     def __repr__(self):
-        return "ChIP Peak: %d-%d %5.2f %s" % \
-            (self.genome_region.leftpos, self.genome_region.rightpos, self.value, self.peak_analysis.name)
+        return "ChIP Peak: %d-%d %5.2f (#%d %s)" % \
+            (self.genome_region.leftpos, self.genome_region.rightpos, self.value, self.peak_analysis.id, self.peak_analysis.name)
 
     def __init__(self, dataset_id, genome_region_id, value, eventpos, pval):
         super(ChIPPeakData, self).__init__(dataset_id, genome_region_id, value)

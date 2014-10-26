@@ -10832,3 +10832,56 @@ SSLError: [Errno 1] _ssl.c:510: error:1407609C:SSL routines:SSL23_GET_CLIENT_HEL
 2014-10-20 23:47:08.565 [NotebookApp] CRITICAL | received signal 15, stopping
 2014-10-20 23:47:08.566 [NotebookApp] Shutting down kernels
 2014-10-20 23:47:08.983 [NotebookApp] Kernel shutdown: b828491d-c728-40ed-92b8-0ded1a48e39c
+2014-10-26 01:03:43.818 [NotebookApp] Using existing profile dir: u'/Users/sfederow/.ipython/profile_nbserver'
+2014-10-26 01:03:43.885 [NotebookApp] Using MathJax from CDN: https://cdn.mathjax.org/mathjax/latest/MathJax.js
+2014-10-26 01:03:43.997 [NotebookApp] Serving notebooks from local directory: /Users/sfederow/ome/ome/examples
+2014-10-26 01:03:43.997 [NotebookApp] 0 active kernels 
+2014-10-26 01:03:43.998 [NotebookApp] The IPython Notebook is running at: https://[all ip addresses on your system]:8888/
+2014-10-26 01:03:43.998 [NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+INFO:tornado.access:302 GET / (72.197.214.22) 57.50ms
+INFO:tornado.access:302 POST /login?next=%2F (72.197.214.22) 1.06ms
+INFO:tornado.access:302 GET / (72.197.214.22) 0.61ms
+2014-10-26 01:13:45.931 [NotebookApp] WARNING | Notebook /OME_views.ipynb is not trusted
+2014-10-26 01:13:47.235 [NotebookApp] Kernel started: 90f8d6ce-ef88-4c22-a395-7c0b0985f8cd
+2014-10-26 01:14:06.469 [NotebookApp] Kernel shutdown: 90f8d6ce-ef88-4c22-a395-7c0b0985f8cd
+2014-10-26 01:14:08.480 [NotebookApp] WARNING | Notebook /OME_views.ipynb is not trusted
+2014-10-26 01:14:09.182 [NotebookApp] Kernel started: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:16:09.279 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:17:09.737 [NotebookApp] Kernel restarted: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:17:57.387 [NotebookApp] Kernel restarted: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:18:09.279 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:22:58.256 [NotebookApp] Kernel restarted: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:24:10.239 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:33:50.899 [NotebookApp] Kernel restarted: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:34:03.061 [NotebookApp] Kernel shutdown: 63a1a5ff-84c3-4398-8925-e1c67be1158b
+2014-10-26 01:34:05.570 [NotebookApp] Kernel started: 5fccaf7f-6732-4c6e-a3f7-fa4a1d380fdc
+2014-10-26 01:36:05.699 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:57:35.256 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:57:37.565 [NotebookApp] Kernel restarted: 5fccaf7f-6732-4c6e-a3f7-fa4a1d380fdc
+2014-10-26 01:57:46.728 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 01:57:53.110 [NotebookApp] Kernel shutdown: 5fccaf7f-6732-4c6e-a3f7-fa4a1d380fdc
+2014-10-26 01:57:56.139 [NotebookApp] Kernel started: f5b990cc-f20d-4d5e-8b87-2acefdefd905
+2014-10-26 01:59:56.279 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 02:05:57.887 [NotebookApp] Saving notebook at /OME_views.ipynb
+2014-10-26 02:06:02.855 [NotebookApp] Kernel restarted: f5b990cc-f20d-4d5e-8b87-2acefdefd905
+2014-10-26 02:06:15.491 [NotebookApp] Kernel shutdown: f5b990cc-f20d-4d5e-8b87-2acefdefd905
+2014-10-26 02:06:19.873 [NotebookApp] Kernel started: 1d74bc73-9a52-47ca-bd0a-532c29571299
+2014-10-26 02:08:19.969 [NotebookApp] Saving notebook at /OME_views.ipynb
+WARNING:tornado.general:SSL Error on 12 ('183.246.24.149', 28013): [Errno 1] _ssl.c:510: error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request
+ERROR:tornado.general:Uncaught exception
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/site-packages/tornado/http1connection.py", line 674, in _server_request_loop
+    ret = yield conn.read_response(request_delegate)
+  File "/usr/local/lib/python2.7/site-packages/tornado/gen.py", line 617, in run
+    value = future.result()
+  File "/usr/local/lib/python2.7/site-packages/tornado/concurrent.py", line 109, in result
+    raise_exc_info(self._exc_info)
+  File "/usr/local/lib/python2.7/site-packages/tornado/gen.py", line 620, in run
+    yielded = self.gen.throw(*sys.exc_info())
+  File "/usr/local/lib/python2.7/site-packages/tornado/http1connection.py", line 165, in _read_message
+    io_loop=self.stream.io_loop)
+  File "/usr/local/lib/python2.7/site-packages/tornado/gen.py", line 617, in run
+    value = future.result()
+  File "/usr/local/lib/python2.7/site-packages/tornado/concurrent.py", line 111, in result
+    raise self._exception
+SSLError: [Errno 1] _ssl.c:510: error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request

@@ -38,7 +38,6 @@ def count_coverage(samfile, flip=False, include_insert=False):
         minus_strands.append(zeros((chromosome_sizes[reference],)))
     # iterate through each mapped read
     for i, read in enumerate(samfile):
-        #if i > 1e3: break
         if read.is_unmapped:
             continue
         # for paired and data get entire insert only from read 1
@@ -62,7 +61,11 @@ def count_coverage(samfile, flip=False, include_insert=False):
 
             # therefore read1 == is_reverse --> negative
             #           read1 != is_reverse --> positive
-            if read.is_reverse == read.is_read1:
+
+            # If unpaired, read.is_read1 will be False,
+            # so we need a separate variable.
+            is_read1 = not read.is_paired or read.is_read1
+            if read.is_reverse == is_read1:
                 minus_strands[read.tid][read.pos:read.aend] += 1
             else:
                 plus_strands[read.tid][read.pos:read.aend] += 1
@@ -71,7 +74,6 @@ def count_coverage(samfile, flip=False, include_insert=False):
         all_counts[reference] = {}
         # roll shifts by 1, so the first base position (at index 0) is now at
         # index 1
-        print reference
         if flip:
             all_counts[reference]["-"] = roll(plus_strands[i], 1)
             all_counts[reference]["+"] = roll(minus_strands[i], 1)
@@ -83,6 +85,8 @@ def count_coverage(samfile, flip=False, include_insert=False):
 
 def count_coverage_5prime(samfile, flip=False):
     """counts the coverage of 5' ends per base in a strand-specific manner
+
+    On paired end reads, this will ignore read 2
 
     flip: Whether or not the strands should be flipped.
     This should be true for RNA-seq, and false for ChIP-exo
@@ -99,7 +103,9 @@ def count_coverage_5prime(samfile, flip=False):
         minus_strands.append(zeros((chromosome_sizes[reference],)))
     # iterate through each mapped read
     for i, read in enumerate(samfile):
-        #if i > 1e5: break
+        if read.is_read2:
+            warn("5' only data should not have been processed as Paired-end.")
+            continue
         if read.is_unmapped:
             continue
         if read.is_reverse:
@@ -118,6 +124,8 @@ def count_coverage_5prime(samfile, flip=False):
             all_counts[reference]["+"] = roll(plus_strands[i], 1)
             all_counts[reference]["-"] = roll(minus_strands[i], 1)
     return all_counts
+
+
 
 
 def gff_variance(gff_file_path):
@@ -142,8 +150,7 @@ def gff_variance(gff_file_path):
 def write_samfile_to_gff(sam_filename, out_filename, flip=False, log2=False,
         separate_strand=False, include_insert=False, five_prime=False,
         track=None):
-    """
-    write samfile object to an output object in a gff format
+    """write samfile object to an output object in a gff format
 
     flip: Whether or not the strands should be flipped.
     This should be true for RNA-seq, and false for ChIP-exo
@@ -154,7 +161,6 @@ def write_samfile_to_gff(sam_filename, out_filename, flip=False, log2=False,
 
     log2: Whether intensities should be reported as log2.
     """
-
     samfile = pysam.Samfile(sam_filename)
     if five_prime:
         all_counts = count_coverage_5prime(samfile, flip=flip)
@@ -181,6 +187,7 @@ def write_samfile_to_gff(sam_filename, out_filename, flip=False, log2=False,
                                          str_func(counts[i], factor), strand))
     output.close()
     samfile.close()
+
 
 
 def load_samfile_to_db(sam_filepath, dataset_id, loading_cutoff=0, bulk_file_load=False,
@@ -846,18 +853,46 @@ def run_array_ttests(base, datasets, genome, group_name, debug=False, overwrite=
 
 
 @timing
-def run_gem(chip_peak_analysis, base, datasets, genome, debug=False, overwrite=False, with_control=False):
+def run_gem(chip_peak_analysis, base, datasets, genome, extra_parameters={}, debug=False, overwrite=False, with_control=False):
 
 
     if chip_peak_analysis.children[0].protocol_type not in ['ChIPExo','ChIPSeq']: return
 
-    default_parameters = {'mrc':20, 'smooth':3, 'nrf':'', 'outNP':''}
     gem_path = settings.home_directory+'/libraries/gem'
     bam_dir = settings.data_directory+'chip_experiment/bam/'
 
     session = base.Session()
 
-    #for chip_peak_analysis in session.query(datasets.ChIPPeakAnalysis).all():
+    parameters = json.loads(chip_peak_analysis.parameters)
+
+    """default_parameters = {'mrc':20, 'smooth':3, 'nrf':'', 'outNP':'', 'nf':'', 'k_min': 4, 'k_max': 22, 'k_win':150}"""
+
+    if set(extra_parameters.items()) - set(parameters.items()):
+
+      new_params = dict(parameters.items() + extra_parameters.items())
+
+      parameter_name = '_'.join([y+'-'+str(z) for y,z in dict(set(extra_parameters.items()) - set(parameters.items())).iteritems()])
+
+
+      vals = chip_peak_analysis.name.split('_')
+      vals[-2] = parameter_name
+
+      new_peak_analysis_name = '_'.join(vals)
+
+      exp = chip_peak_analysis.children[0]
+
+      new_peak_analysis = session.get_or_create(datasets.ChIPPeakAnalysis, name=new_peak_analysis_name, environment_id=exp.environment.id,
+                                                strain_id=exp.strain.id, parameters=json.dumps(new_params), replicate=1, group_name=exp.group_name)
+
+      for experiment in chip_peak_analysis.children:
+          session.get_or_create(datasets.AnalysisComposition, analysis_id = new_peak_analysis.id, dataset_id = experiment.id)
+
+      chip_peak_analysis = new_peak_analysis
+      parameters = new_params
+
+
+
+    parameter_string = ' '.join(['--'+y+' '+str(z) for y,z in parameters.iteritems()])
 
     outdir = chip_peak_analysis.name
     out_path = settings.data_directory+'chip_peaks/gem/'+outdir
@@ -883,9 +918,6 @@ def run_gem(chip_peak_analysis, base, datasets, genome, debug=False, overwrite=F
     else:
         control_input_files = ''
 
-
-    params = json.loads(chip_peak_analysis.parameters)
-    parameter_string = ' '.join(['--'+y+' '+str(z) for y,z in params.iteritems()])
 
 
     gem_string = "java -Xmx5G -jar %s/gem.jar --d %s/Read_Distribution_ChIP-exo.txt --g %s --genome %s %s %s --f SAM %s" %\
