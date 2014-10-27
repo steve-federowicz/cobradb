@@ -801,8 +801,8 @@ def calculate_differential_expression(base, datasets, experiment1, experiment2):
 def run_array_ttests(base, datasets, genome, group_name, debug=False, overwrite=False):
     session = base.Session()
     exp_objects = session.query(datasets.NormalizedExpression).filter(datasets.NormalizedExpression.group_name == group_name).\
-                                   join(datasets.AnalysisComposition, datasets.NormalizedExpression.id == data.AnalysisComposition.analysis_id).\
-                                   join(datasets.ArrayExperiment, data.ArrayExperiment.id == datasets.AnalysisComposition.dataset_id).all()
+                                   join(datasets.AnalysisComposition, datasets.NormalizedExpression.id == datasets.AnalysisComposition.analysis_id).\
+                                   join(datasets.ArrayExperiment, datasets.ArrayExperiment.id == datasets.AnalysisComposition.dataset_id).all()
 
     contrasts = find_single_factor_pairwise_contrasts(exp_objects)
 
@@ -1140,7 +1140,7 @@ def load_extra_analyses(base, datasets, genome, analyses_folder, group_name=None
     session.close()
 
 @timing
-def load_gff_chip_peaks(chip_peak_analyses, base, datasets, genome, group_name):
+def load_gff_chip_peaks(chip_peak_analyses, base, datasets, chromosome, group_name):
     gff_path = settings.data_directory+'/chip_peaks/'+group_name
     session = base.Session()
     for chip_peak_analysis in chip_peak_analyses:
@@ -1154,7 +1154,11 @@ def load_gff_chip_peaks(chip_peak_analyses, base, datasets, genome, group_name):
 
             position = (int(vals[3])+int(vals[4]))/2
 
-            peak_region = session.get_or_create(base.GenomeRegion, leftpos=vals[3], rightpos=vals[4], strand='+', genome_id=genome.id)
+            ##temporary hack to work with only E. coli or single chromosome genomes
+            peak_region = session.get_or_create(base.GenomeRegion, name='peak_%s_%d' % (vals[3], chromosome.id),
+                                                                   leftpos=vals[3],
+                                                                   rightpos=vals[4],
+                                                                   strand='+', chromosome_id=chromosome.id)
 
             peak_data = session.get_or_create(datasets.ChIPPeakData, dataset_id=chip_peak_analysis.id, genome_region_id=peak_region.id,\
                                                 value=vals[5], eventpos=position, pval=0.)
@@ -1197,9 +1201,9 @@ def load_arraydata(file_path, datasets, group_name='ec2'):
                 exp_id_map[i]
             except: continue
 
-            array_data = data.GenomeData(dataset_id = exp_id_map[i],
-                                         genome_region_id = gene.id,
-                                         value=value)
+            array_data = datasets.GenomeData(dataset_id = exp_id_map[i],
+                                             genome_region_id = gene.id,
+                                             value=value)
             session.add(array_data)
 
     session.flush()
@@ -1254,7 +1258,7 @@ def make_genome_region_map(base, datasets, genome):
 
     for peak in session.query(datasets.ChIPPeakData).all():
         genome_region_1 = peak.genome_region
-        print genome_region_1
+        #print genome_region_1
 
         for tu in tus:
             genome_region_2 = tu.genome_region

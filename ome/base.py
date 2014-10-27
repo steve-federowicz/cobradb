@@ -108,7 +108,7 @@ class Component(Base):
     formula = Column(String)
     type = Column(String(20))
 
-    __table_args__ = (UniqueConstraint('name'),{})
+    __table_args__ = (UniqueConstraint('name','type'),{})
 
     __mapper_args__ = {'polymorphic_identity': 'component',
                        'polymorphic_on': type
@@ -261,6 +261,16 @@ def get_or_create(session, class_type, **kwargs):
         if constraint.__class__.__name__ == 'UniqueConstraint':
             unique_cols = constraint.columns.keys()
 
+
+    total_args = kwargs
+
+    if 'type' in class_type.__dict__:
+
+        type_dict = {'type': class_type.__mapper_args__['polymorphic_identity']}
+        total_args = dict(kwargs.items() + type_dict.items())
+
+
+
     inherited_result = True
     if '__mapper_args__' in class_type.__dict__ and 'inherits' in class_type.__mapper_args__:
         inherited_class_type = class_type.__mapper_args__['inherits']
@@ -268,10 +278,19 @@ def get_or_create(session, class_type, **kwargs):
             if constraint.__class__.__name__ == 'UniqueConstraint':
 				        inherited_unique_cols = constraint.columns.keys()
 
-        inherited_result = session.query(inherited_class_type).filter_by(**{k: kwargs[k] for k in inherited_unique_cols}).first()
+        #type_dict = {'type': class_type.__mapper_args__['polymorphic_identity']}
+
+        #total_args = dict(kwargs.items() + type_dict.items())
+
+        inherited_result = session.query(inherited_class_type).filter_by(**{k: total_args[k] for k in inherited_unique_cols}).first()
 
 
-    result = session.query(class_type).filter_by(**{k: kwargs[k] for k in unique_cols}).first()
+    #try:
+    #    if kwargs['name'] == 'MONOMER-52':
+    #        from IPython import embed; embed()
+    #except: None
+    result = session.query(class_type).filter_by(**{k: total_args[k] for k in unique_cols}).first()
+
 
     if not result or not inherited_result:
         result = class_type(**kwargs)

@@ -326,7 +326,6 @@ def load_genome(genbank_file, base, components, debug=False):
              (genbank_file, e.message))
         return
 
-    #from IPython import embed; embed()
     bioproject_id = ''
     for value in gb_file.dbxrefs[0].split():
         if 'BioProject' in value:
@@ -556,6 +555,7 @@ def load_metacyc_bindsites(base, components, chromosome):
         if vals is None: continue
 
         if 'Transcription-Factor-Binding' in vals['TYPES']:
+
             regulator = session.get_or_create(components.Component, name=vals['REGULATOR'][0])
 
             binding_site = session.query(components.DnaBindingSite).filter_by(name=vals['ASSOCIATED-BINDING-SITE'][0]).first()

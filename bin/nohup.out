@@ -1,2125 +1,960 @@
-starting write_chromosome_annotation_gff ... <module 'ome.base' from '/Users/sfederow/ome/ome/ome/base.pyc'>
-write_chromosome_annotation_gff complete (0.31 sec)
-starting load_raw_files ... /Volumes/extra/Dropbox/ome_data/chip_experiment/fastq/crp
-load_raw_files complete (0.91 sec)
-starting load_raw_files ... /Volumes/extra/Dropbox/ome_data/chip_experiment/gff
-load_raw_files complete (0.33 sec)
-starting load_raw_files ... /Volumes/extra/Dropbox/ome_data/rnaseq_experiment/fastq/crp
-load_raw_files complete (1.33 sec)
-starting load_raw_files ... /Volumes/extra/Dropbox/ome_data/microarray/asv2
-load_raw_files complete (0.47 sec)
-starting load_raw_files ... /Volumes/extra/Dropbox/ome_data/microarray/ec2
-load_raw_files complete (0.51 sec)
-starting run_gem ... ChIP Peak Analysis (#41825, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_default_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-
-Welcome to GEM (version 2.3)!
-
-Please cite: 
-Yuchun Guo, Shaun Mahony, David K. Gifford (2012) PLoS Computational Biology 8(8): e1002638. 
-High Resolution Genome Wide Binding Event Finding and Motif Discovery Reveals Transcription Factor Spatial Binding Constraints. 
-doi:10.1371/journal.pcbi.1002638
-
-Gifford Laboratory at MIT (http://cgs.csail.mit.edu/gem/).
-
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-crp
-Loading reads from: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-crp.bam ... Loaded
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-crp
-Loading reads from: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-crp.bam ... Loaded
-
-Options:
---d /Users/sfederow/libraries/gem/Read_Distribution_ChIP-exo.txt --g /Volumes/extra/Dropbox/ome_data/annotation/ec_mg1655.sizes --genome /Volumes/extra/Dropbox/ome_data/annotation --exptChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-crp /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-crp.bam --exptChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-crp /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-crp.bam --f SAM --k_win 150 --smooth 3 --nrf --nf --k_min 4 --q 1.3 --k_max 22 --outNP --mrc 20 
-
-Mappable Genome Length is 3,711,740.
-
-Getting 5' positions of all reads...
-ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-crp_IP  	Bases: 203497	HitCounts: 2535835.0
-ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-crp_IP  	Bases: 191901	HitCounts: 2552594.0
-
-Normalizing read counts across multiple conditions ...
-
-At Poisson p-value 1.0e-03, in a 301bp window, expect 477 reads.
-
-
-Sorting reads and selecting enriched regions ...
-
-The genome is segmented into 6355 regions for analysis.
-
-============================ Round 0 ============================
-Running with 8 threads ...
-100	/6355	12.1s
-1000	/6355	15.1s
-2000	/6355	17.1s
-3000	/6355	18.1s
-4000	/6355	19.1s
-5000	/6355	20.1s
-6000	/6355	21.1s
-6355	/6355	23.1s
----------------------------
-Events discovered 
-Significant:	35
-Insignificant:	0
-Filtered:	0
-
-Total 13 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 23.1s
-
-
-Warning: The read distribution is not updated, too few (35<500) significant events.
-
-============================ Round 1 ============================
-Running with 8 threads ...
-100	/6355	1.1s
-1000	/6355	2.1s
-2000	/6355	3.1s
-3000	/6355	4.1s
-4000	/6355	6.1s
-5000	/6355	8.1s
-6000	/6355	11.1s
-6355	/6355	12.1s
----------------------------
-Events discovered 
-Significant:	35
-Insignificant:	0
-Filtered:	0
-
-Total 13 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 12.1s
-
-
-Warning: The read distribution is not updated, too few (35<500) significant events.
-Loading genome sequences ...
-Done, 208mils
-GC content=0.50
-
-Running KMAC motif discovery with 35+/35- sequences.
-
-
-----------------------------------------------
-Trying k=4 ...
-
-k=4, mapped 0 k-mers, 51mils
-k=4, selected 0 k-mers from 35+/35- sequences, 7mils
-
-----------------------------------------------
-Trying k=5 ...
-
-k=5, mapped 154 k-mers, 46mils
-k=5, selected 6 k-mers from 35+/35- sequences, 18mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-CATTT/AAATG	29	27	7	-7.0
-TCACA/TGTGA	26	26	7	-6.4
-AATTA/TAATT	20	20	6	-4.1
-ATTTA/TAAAT	21	20	6	-4.1
-TTGTG/CACAA	20	19	6	-3.7
-Seed k-mer:
-CATTT/AAATG	29	27	7	-7.0
-
-
-----------------------------------------------
-Trying k=6 ...
-
-k=6, mapped 682 k-mers, 63mils
-k=6, selected 27 k-mers from 35+/35- sequences, 22mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-AAAATG/CATTTT	22	21	4	-5.8
-AAAAAT/ATTTTT	21	19	4	-4.9
-ATCACA/TGTGAT	19	18	2	-6.0
-TTTTTA/TAAAAA	18	18	5	-3.9
-GCATTT/AAATGC	18	17	0	-7.7
-Seed k-mer:
-GCATTT/AAATGC	18	17	0	-7.7
-
-
-----------------------------------------------
-Trying k=7 ...
-
-k=7, mapped 432 k-mers, 48mils
-k=7, selected 9 k-mers from 35+/35- sequences, 12mils
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-TTGTGAT/ATCACAA	14	13	0	-5.8
-AAAAATG/CATTTTT	14	12	0	-5.3
-TTTGTGA/TCACAAA	13	12	1	-4.5
-TTTTGTG/CACAAAA	12	11	1	-4.1
-AAAATGC/GCATTTT	12	10	0	-4.5
-Seed k-mer:
-TTGTGAT/ATCACAA	14	13	0	-5.8
-
-
-----------------------------------------------
-Trying k=8 ...
-
-k=8, mapped 205 k-mers, 50mils
-k=8, selected 2 k-mers from 35+/35- sequences, 4mils
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-TTTGTGAT/ATCACAAA	11	10	0	-4.5
-TCACAAAA/TTTTGTGA	10	9	0	-4.1
-Seed k-mer:
-TTTGTGAT/ATCACAAA	11	10	0	-4.5
-
-
-----------------------------------------------
-Trying k=9 ...
-
-k=9, mapped 116 k-mers, 45mils
-k=9, selected 1 k-mers from 35+/35- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.       	PosCt	wPosCt	NegCt	HGP_10
-ATCACAAAA/TTTTGTGAT	8	7	0	-3.3
-Seed k-mer:
-ATCACAAAA/TTTTGTGAT	8	7	0	-3.3
-
-
-----------------------------------------------
-Trying k=10 ...
-
-k=10, mapped 79 k-mers, 36mils
-k=10, selected 0 k-mers from 35+/35- sequences, 2mils
-
-----------------------------------------------
-Trying k=11 ...
-
-k=11, mapped 66 k-mers, 35mils
-k=11, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=12 ...
-
-k=12, mapped 57 k-mers, 34mils
-k=12, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=13 ...
-
-k=13, mapped 55 k-mers, 33mils
-k=13, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=14 ...
-
-k=14, mapped 54 k-mers, 33mils
-k=14, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=15 ...
-
-k=15, mapped 53 k-mers, 32mils
-k=15, selected 0 k-mers from 35+/35- sequences, 2mils
-
-----------------------------------------------
-Trying k=16 ...
-
-k=16, mapped 52 k-mers, 33mils
-k=16, selected 0 k-mers from 35+/35- sequences, 2mils
-
-----------------------------------------------
-Trying k=17 ...
-
-k=17, mapped 51 k-mers, 33mils
-k=17, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=18 ...
-
-k=18, mapped 50 k-mers, 33mils
-k=18, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=19 ...
-
-k=19, mapped 49 k-mers, 41mils
-k=19, selected 0 k-mers from 35+/35- sequences, 2mils
-
-----------------------------------------------
-Trying k=20 ...
-
-k=20, mapped 48 k-mers, 39mils
-k=20, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=21 ...
-
-k=21, mapped 47 k-mers, 34mils
-k=21, selected 0 k-mers from 35+/35- sequences, 1mils
-
-----------------------------------------------
-Trying k=22 ...
-
-k=22, mapped 46 k-mers, 33mils
-k=22, selected 0 k-mers from 35+/35- sequences, 2mils
-
-------------------- out_1 ----------------------
-k=4	can not form a PWM.
-k=5	hit=29	hgp=1e-12.8	W=6	PWM=GCATTT.
-k=6	hit=29	hgp=1e-12.8	W=6	PWM=GCATTT.
-k=7	hit=23	hgp=1e-11.2	W=7	PWM=TTGTGAT.
-k=8	hit=19	hgp=1e-6.5	W=9	PWM=TTTGTGATG.
-k=9	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=10	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=11	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=12	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=13	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=14	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=15	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=16	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=17	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=18	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=19	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=20	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=21	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-k=22	hit=13	hgp=1e-5.8	W=10	PWM=CATCACAAAA.
-
-Selected k=5	hit=29	hgp=1e-12.8.
-----------------------------------------------
-
-k=5, mapped 154 k-mers, 33mils
-k=5, selected 6 k-mers from 35+/35- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-CATTT/AAATG	29	27	7	-7.0
-TCACA/TGTGA	26	26	7	-6.4
-AATTA/TAATT	20	20	6	-4.1
-ATTTA/TAAAT	21	20	6	-4.1
-TTGTG/CACAA	20	19	6	-3.7
-Seed k-mer:
-CATTT/AAATG	29	27	7	-7.0
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_1 k-mer cluster #0, aligned 1 k-mers, 29 sequences.
-    |
-GCATTT
-A     
-      
-      
-PWM threshold: 8.84/10.61, 	hit=29+/2-, hgp=1e-12.8
-KSM threshold: 6.98, 	hit=27+/7-, hgp=1e-7.0
---------------------------------------------------------------
-out_1 k-mer cluster #1, aligned 2 k-mers, 33 sequences.
-         |
-AATTA
- T   
-     
-     
-PWM threshold: 5.78/8.93, 	hit=33+/11-, hgp=1e-9.2
-KSM threshold: 4.13, 	hit=33+/11-, hgp=1e-9.2
---------------------------------------------------------------
-out_1 k-mer cluster #2, aligned 2 k-mers, 29 sequences.
-CACAAAA
-    CTT
-    T  
-       
-PWM threshold: 6.66/10.51, 	hit=28+/5-, hgp=1e-9.1
-KSM threshold: 3.74, 	hit=30+/10-, hgp=1e-7.2
-
-Finish KMAC motif discovery, 1.6s
-
-============================ Round 2 ============================
-Running EM with motif positional prior ...
-Running with 8 threads ...
-100	/6355	5.1s
-1000	/6355	9.1s
-2000	/6355	11.1s
-3000	/6355	13.1s
-4000	/6355	15.1s
-5000	/6355	19.1s
-6000	/6355	23.1s
-6355	/6355	24.1s
----------------------------
-Events discovered 
-Significant:	134
-Insignificant:	311
-Filtered:	0
-
-Percentage of events with a k-mer match in 10 bins (~14 events per bin):
-57 92 100 71 50 57 71 71 78 87 
-
-Total 33 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 24.1s
-
-
-Warning: The read distribution is not updated, too few (134<500) significant events.
-Running KMAC motif discovery with 445+/52- sequences.
-
-k=5, mapped 140 k-mers, 108mils
-k=5, selected 3 k-mers from 445+/52- sequences, 4mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-CATTT/AAATG	433	411	11	-30.1
-ATTTA/TAAAT	204	217	8	-6.5
-ATGCT/AGCAT	145	135	5	-3.8
-Seed k-mer:
-CATTT/AAATG	433	411	11	-30.1
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_2 k-mer cluster #0, aligned 1 k-mers, 433 sequences.
-       |
-CATTT
-     
-     
-     
-PWM threshold: 9.98/9.98, 	hit=433+/11-, hgp=1e-40.3
-KSM threshold: 30.14, 	hit=411+/11-, hgp=1e-30.1
-
-Finish KMAC motif discovery, 481mils
-
-Finished! GEM analysis results are printed to:
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks/out_GEM_events.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks/out_KSM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks/out_PFM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks/out_result.htm
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks/out_outputs (folder with all other files)
-
-
-Total running time: 1.4m
-
-run_gem complete (87.54 sec)
-starting load_gem ... ChIP Peak Analysis (#41825, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_default_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-load_gem complete (0.16 sec)
-starting run_gem ... ChIP Peak Analysis (#41826, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_default_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-
-Welcome to GEM (version 2.3)!
-
-Please cite: 
-Yuchun Guo, Shaun Mahony, David K. Gifford (2012) PLoS Computational Biology 8(8): e1002638. 
-High Resolution Genome Wide Binding Event Finding and Motif Discovery Reveals Transcription Factor Spatial Binding Constraints. 
-doi:10.1371/journal.pcbi.1002638
-
-Gifford Laboratory at MIT (http://cgs.csail.mit.edu/gem/).
-
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-myc
-Loading reads from: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-myc.bam ... Loaded
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-myc
-Loading reads from: ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-myc.bam ... Loaded
-
-Options:
---d /Users/sfederow/libraries/gem/Read_Distribution_ChIP-exo.txt --g /Volumes/extra/Dropbox/ome_data/annotation/ec_mg1655.sizes --genome /Volumes/extra/Dropbox/ome_data/annotation --exptChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-myc /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-myc.bam --exptChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-myc /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-myc.bam --f SAM --k_win 150 --smooth 3 --nrf --nf --k_min 4 --q 1.3 --k_max 22 --outNP --mrc 20 
-
-Mappable Genome Length is 3,711,740.
-
-Getting 5' positions of all reads...
-ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_1_anti-myc_IP  	Bases: 443289	HitCounts: 2855472.0
-ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_2_anti-myc_IP  	Bases: 505562	HitCounts: 3095369.0
-
-Normalizing read counts across multiple conditions ...
-
-At Poisson p-value 1.0e-03, in a 301bp window, expect 552 reads.
-
-
-Sorting reads and selecting enriched regions ...
-
-The genome is segmented into 6362 regions for analysis.
-
-============================ Round 0 ============================
-Running with 8 threads ...
-100	/6362	13.1s
-1000	/6362	27.1s
-2000	/6362	34.1s
-3000	/6362	39.1s
-4000	/6362	41.1s
-5000	/6362	42.1s
-6000	/6362	43.1s
-6362	/6362	47.1s
----------------------------
-Events discovered 
-Significant:	18
-Insignificant:	0
-Filtered:	0
-
-Total 4 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 47.1s
-
-
-Warning: The read distribution is not updated, too few (18<500) significant events.
-
-============================ Round 1 ============================
-Running with 8 threads ...
-100	/6362	1.1s
-1000	/6362	6.1s
-2000	/6362	10.1s
-3000	/6362	13.1s
-4000	/6362	19.1s
-5000	/6362	26.1s
-6000	/6362	35.1s
-6362	/6362	38.1s
----------------------------
-Events discovered 
-Significant:	18
-Insignificant:	0
-Filtered:	0
-
-Total 4 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 38.2s
-
-
-Warning: The read distribution is not updated, too few (18<500) significant events.
-Loading genome sequences ...
-Done, 217mils
-GC content=0.52
-
-Running KMAC motif discovery with 18+/18- sequences.
-
-
-----------------------------------------------
-Trying k=4 ...
-
-k=4, mapped 0 k-mers, 38mils
-k=4, selected 0 k-mers from 18+/18- sequences, 5mils
-
-----------------------------------------------
-Trying k=5 ...
-
-k=5, mapped 196 k-mers, 48mils
-k=5, selected 3 k-mers from 18+/18- sequences, 18mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-CAATT/AATTG	12	12	2	-4.4
-AATTT/AAATT	11	11	2	-3.8
-ACAAA/TTTGT	11	11	2	-3.8
-Seed k-mer:
-CAATT/AATTG	12	12	2	-4.4
-
-
-----------------------------------------------
-Trying k=6 ...
-
-k=6, mapped 293 k-mers, 42mils
-k=6, selected 12 k-mers from 18+/18- sequences, 9mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-AAAATG/CATTTT	12	11	2	-3.8
-ATCACA/TGTGAT	10	11	2	-3.8
-AAAAAT/ATTTTT	10	9	0	-4.8
-AAATGT/ACATTT	9	9	1	-3.8
-GAAAAT/ATTTTC	8	8	1	-3.3
-Seed k-mer:
-AAAAAT/ATTTTT	10	9	0	-4.8
-
-
-----------------------------------------------
-Trying k=7 ...
-
-k=7, mapped 116 k-mers, 45mils
-k=7, selected 3 k-mers from 18+/18- sequences, 3mils
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-TTGTGAT/ATCACAA	7	8	1	-3.3
-AAAAATG/CATTTTT	8	7	0	-3.8
-TCACAAA/TTTGTGA	6	7	0	-3.8
-Seed k-mer:
-AAAAATG/CATTTTT	8	7	0	-3.8
-
-
-----------------------------------------------
-Trying k=8 ...
-
-k=8, mapped 38 k-mers, 37mils
-k=8, selected 1 k-mers from 18+/18- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-TTTGTGAT/ATCACAAA	5	6	0	-3.3
-Seed k-mer:
-TTTGTGAT/ATCACAAA	5	6	0	-3.3
-
-
-----------------------------------------------
-Trying k=9 ...
-
-k=9, mapped 14 k-mers, 39mils
-k=9, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=10 ...
-
-k=10, mapped 6 k-mers, 37mils
-k=10, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=11 ...
-
-k=11, mapped 2 k-mers, 36mils
-k=11, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=12 ...
-
-k=12, mapped 0 k-mers, 36mils
-k=12, selected 0 k-mers from 18+/18- sequences, 0mils
-
-----------------------------------------------
-Trying k=13 ...
-
-k=13, mapped 0 k-mers, 36mils
-k=13, selected 0 k-mers from 18+/18- sequences, 0mils
-
-----------------------------------------------
-Trying k=14 ...
-
-k=14, mapped 0 k-mers, 36mils
-k=14, selected 0 k-mers from 18+/18- sequences, 0mils
-
-----------------------------------------------
-Trying k=15 ...
-
-k=15, mapped 0 k-mers, 36mils
-k=15, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=16 ...
-
-k=16, mapped 0 k-mers, 36mils
-k=16, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=17 ...
-
-k=17, mapped 0 k-mers, 36mils
-k=17, selected 0 k-mers from 18+/18- sequences, 0mils
-
-----------------------------------------------
-Trying k=18 ...
-
-k=18, mapped 0 k-mers, 36mils
-k=18, selected 0 k-mers from 18+/18- sequences, 0mils
-
-----------------------------------------------
-Trying k=19 ...
-
-k=19, mapped 0 k-mers, 36mils
-k=19, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=20 ...
-
-k=20, mapped 0 k-mers, 38mils
-k=20, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=21 ...
-
-k=21, mapped 0 k-mers, 37mils
-k=21, selected 0 k-mers from 18+/18- sequences, 1mils
-
-----------------------------------------------
-Trying k=22 ...
-
-k=22, mapped 0 k-mers, 36mils
-k=22, selected 0 k-mers from 18+/18- sequences, 1mils
-
-------------------- out_1 ----------------------
-k=4	can not form a PWM.
-k=5	hit=16	hgp=1e-5.7	W=7	PWM=AATTTAC.
-k=6	hit=13	hgp=1e-6.1	W=8	PWM=AAAAATGT.
-k=7	hit=17	hgp=1e-4.8	W=7	PWM=AAAAATG.
-k=8	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=9	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=10	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=11	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=12	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=13	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=14	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=15	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=16	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=17	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=18	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=19	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=20	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=21	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-k=22	hit=12	hgp=1e-4.4	W=7	PWM=TTTGTGA.
-
-Selected k=6	hit=13	hgp=1e-6.1.
-----------------------------------------------
-
-k=6, mapped 293 k-mers, 38mils
-k=6, selected 12 k-mers from 18+/18- sequences, 6mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-AAAATG/CATTTT	12	11	2	-3.8
-ATCACA/TGTGAT	10	11	2	-3.8
-AAAAAT/ATTTTT	10	9	0	-4.8
-AAATGT/ACATTT	9	9	1	-3.8
-GAAAAT/ATTTTC	8	8	1	-3.3
-Seed k-mer:
-AAAAAT/ATTTTT	10	9	0	-4.8
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_1 k-mer cluster #0, aligned 3 k-mers, 13 sequences.
-                      |
-AAAAATGT
-       C
-        
-        
-PWM threshold: 8.06/13.23, 	hit=13+/1-, hgp=1e-6.1
-KSM threshold: 3.76, 	hit=13+/3-, hgp=1e-4.2
---------------------------------------------------------------
-out_1 k-mer cluster #1, aligned 3 k-mers, 15 sequences.
-TCACAAAT
-       A
-        
-        
-PWM threshold: 8.18/12.20, 	hit=14+/2-, hgp=1e-5.7
-KSM threshold: 3.10, 	hit=12+/3-, hgp=1e-3.6
---------------------------------------------------------------
-out_1 k-mer cluster #2, aligned 2 k-mers, 14 sequences.
-AATTGA
-      
-      
-      
-PWM threshold: 6.52/10.61, 	hit=12+/5-, hgp=1e-2.5
-KSM threshold: 3.29, 	hit=9+/0-, hgp=1e-4.8
-
-Finish KMAC motif discovery, 1.6s
-
-============================ Round 2 ============================
-Running EM with motif positional prior ...
-Running with 8 threads ...
-100	/6362	12.0s
-1000	/6362	20.1s
-2000	/6362	24.1s
-3000	/6362	28.1s
-4000	/6362	34.1s
-5000	/6362	41.1s
-6000	/6362	50.1s
-6362	/6362	52.1s
----------------------------
-Events discovered 
-Significant:	46
-Insignificant:	183
-Filtered:	0
-
-Percentage of events with a k-mer match in 10 bins (~5 events per bin):
-80 100 100 60 80 60 60 20 80 0 
-
-Total 8 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 52.3s
-
-
-Warning: The read distribution is not updated, too few (46<500) significant events.
-Running KMAC motif discovery with 229+/30- sequences.
-
-k=6, mapped 824 k-mers, 87mils
-k=6, selected 8 k-mers from 229+/30- sequences, 21mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-AAAAAT/ATTTTT	152	147	1	-12.2
-CATTTT/AAAATG	125	132	2	-8.7
-AAAAAA/TTTTTT	83	89	2	-4.8
-CAAAAA/TTTTTG	76	77	1	-5.0
-AAATGT/ACATTT	62	75	2	-3.7
-Seed k-mer:
-AAAAAT/ATTTTT	152	147	1	-12.2
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_2 k-mer cluster #0, aligned 5 k-mers, 217 sequences.
-                   |
-AAAAAT
-      
-      
-      
-PWM threshold: 8.72/11.74, 	hit=217+/10-, hgp=1e-15.5
-KSM threshold: 8.75, 	hit=202+/3-, hgp=1e-19.6
-
-Finish KMAC motif discovery, 513mils
-
-Finished! GEM analysis results are printed to:
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_GEM_events.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_KSM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_PFM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_result.htm
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_outputs (folder with all other files)
-
-
-Total running time: 2.8m
-
-run_gem complete (168.20 sec)
-starting load_gem ... ChIP Peak Analysis (#41826, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_default_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-load_gem complete (0.08 sec)
-starting run_gem ... ChIP Peak Analysis (#41827, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_default_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-
-Welcome to GEM (version 2.3)!
-
-Please cite: 
-Yuchun Guo, Shaun Mahony, David K. Gifford (2012) PLoS Computational Biology 8(8): e1002638. 
-High Resolution Genome Wide Binding Event Finding and Motif Discovery Reveals Transcription Factor Spatial Binding Constraints. 
-doi:10.1371/journal.pcbi.1002638
-
-Gifford Laboratory at MIT (http://cgs.csail.mit.edu/gem/).
-
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-crp
-Loading reads from: ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-crp.bam ... Loaded
-
-Options:
---d /Users/sfederow/libraries/gem/Read_Distribution_ChIP-exo.txt --g /Volumes/extra/Dropbox/ome_data/annotation/ec_mg1655.sizes --genome /Volumes/extra/Dropbox/ome_data/annotation --exptChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-crp /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-crp.bam --f SAM --k_win 150 --smooth 3 --nrf --nf --k_min 4 --q 1.3 --k_max 22 --outNP --mrc 20 
-
-Mappable Genome Length is 3,711,740.
-
-Getting 5' positions of all reads...
-ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-crp_IP  	Bases: 346807	HitCounts: 3532855.0
-
-At Poisson p-value 1.0e-03, in a 301bp window, expect 340 reads.
-
-
-Sorting reads and selecting enriched regions ...
-
-The genome is segmented into 6343 regions for analysis.
-
-============================ Round 0 ============================
-Running with 8 threads ...
-100	/6343	14.1s
-1000	/6343	18.1s
-2000	/6343	19.1s
-3000	/6343	20.1s
-4000	/6343	21.1s
-5000	/6343	22.1s
-6000	/6343	23.1s
-6343	/6343	23.1s
----------------------------
-Events discovered 
-Significant:	42
-Insignificant:	0
-Filtered:	0
-
-Total 20 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 23.1s
-
-
-Warning: The read distribution is not updated, too few (42<500) significant events.
-
-============================ Round 1 ============================
-Running with 8 threads ...
-100	/6343	1.0s
-1000	/6343	2.0s
-2000	/6343	3.1s
-3000	/6343	4.1s
-4000	/6343	5.1s
-5000	/6343	7.1s
-6000	/6343	9.1s
-6343	/6343	10.1s
----------------------------
-Events discovered 
-Significant:	42
-Insignificant:	0
-Filtered:	0
-
-Total 20 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 10.1s
-
-
-Warning: The read distribution is not updated, too few (42<500) significant events.
-Loading genome sequences ...
-Done, 213mils
-GC content=0.49
-
-Running KMAC motif discovery with 42+/42- sequences.
-
-
-----------------------------------------------
-Trying k=4 ...
-
-k=4, mapped 0 k-mers, 45mils
-k=4, selected 0 k-mers from 42+/42- sequences, 8mils
-
-----------------------------------------------
-Trying k=5 ...
-
-k=5, mapped 156 k-mers, 52mils
-k=5, selected 1 k-mers from 42+/42- sequences, 24mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-ATGCT/AGCAT	13	13	3	-3.1
-Seed k-mer:
-ATGCT/AGCAT	13	13	3	-3.1
-
-
-----------------------------------------------
-Trying k=6 ...
-
-k=6, mapped 927 k-mers, 51mils
-k=6, selected 13 k-mers from 42+/42- sequences, 23mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	25	24	5	-6.0
-AAAATT/AATTTT	18	20	5	-4.4
-ATCACA/TGTGAT	20	19	6	-3.5
-GAAAAT/ATTTTC	18	19	4	-4.6
-CAAAAT/ATTTTG	17	18	5	-3.7
-Seed k-mer:
-CATTTT/AAAATG	25	24	5	-6.0
-
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	25	24	5	-6.0
-AAAATT/AATTTT	18	20	5	-4.4
-ATCACA/TGTGAT	20	19	6	-3.5
-GAAAAT/ATTTTC	18	19	4	-4.6
-CAAAAT/ATTTTG	17	18	5	-3.7
-Seed k-mer:
-TCACTT/AAGTGA	13	11	0	-4.8
-
-
-----------------------------------------------
-Trying k=7 ...
-
-k=7, mapped 600 k-mers, 38mils
-k=7, selected 6 k-mers from 42+/42- sequences, 17mils
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-ATTTTCA/TGAAAAT	14	15	1	-5.6
-TCAAAAT/ATTTTGA	12	13	1	-4.8
-GAAAATT/AATTTTC	9	11	1	-4.0
-TCACTTT/AAAGTGA	8	8	0	-3.6
-ATTTCAA/TTGAAAT	6	7	0	-3.3
-Seed k-mer:
-ATTTTCA/TGAAAAT	14	15	1	-5.6
-
-
-----------------------------------------------
-Trying k=8 ...
-
-k=8, mapped 243 k-mers, 46mils
-k=8, selected 1 k-mers from 42+/42- sequences, 4mils
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-TGAAAATT/AATTTTCA	8	10	1	-3.6
-Seed k-mer:
-TGAAAATT/AATTTTCA	8	10	1	-3.6
-
-
-----------------------------------------------
-Trying k=9 ...
-
-k=9, mapped 92 k-mers, 48mils
-k=9, selected 0 k-mers from 42+/42- sequences, 3mils
-
-----------------------------------------------
-Trying k=10 ...
-
-k=10, mapped 43 k-mers, 43mils
-k=10, selected 0 k-mers from 42+/42- sequences, 2mils
-
-----------------------------------------------
-Trying k=11 ...
-
-k=11, mapped 25 k-mers, 43mils
-k=11, selected 0 k-mers from 42+/42- sequences, 2mils
-
-----------------------------------------------
-Trying k=12 ...
-
-k=12, mapped 16 k-mers, 43mils
-k=12, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=13 ...
-
-k=13, mapped 15 k-mers, 43mils
-k=13, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=14 ...
-
-k=14, mapped 14 k-mers, 42mils
-k=14, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=15 ...
-
-k=15, mapped 13 k-mers, 42mils
-k=15, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=16 ...
-
-k=16, mapped 12 k-mers, 42mils
-k=16, selected 0 k-mers from 42+/42- sequences, 2mils
-
-----------------------------------------------
-Trying k=17 ...
-
-k=17, mapped 11 k-mers, 43mils
-k=17, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=18 ...
-
-k=18, mapped 10 k-mers, 43mils
-k=18, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=19 ...
-
-k=19, mapped 9 k-mers, 44mils
-k=19, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=20 ...
-
-k=20, mapped 8 k-mers, 44mils
-k=20, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=21 ...
-
-k=21, mapped 7 k-mers, 45mils
-k=21, selected 0 k-mers from 42+/42- sequences, 1mils
-
-----------------------------------------------
-Trying k=22 ...
-
-k=22, mapped 6 k-mers, 43mils
-k=22, selected 0 k-mers from 42+/42- sequences, 1mils
-
-------------------- out_1 ----------------------
-k=4	can not form a PWM.
-k=5	hit=13	hgp=1e-3.1	W=6	PWM=ATGCTG.
-k=6	hit=27	hgp=1e-12.7	W=8	PWM=ATCACTTT.
-k=7	hit=19	hgp=1e-6.2	W=7	PWM=ATTTTCA.
-k=8	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=9	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=10	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=11	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=12	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=13	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=14	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=15	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=16	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=17	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=18	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=19	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=20	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=21	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-k=22	hit=14	hgp=1e-3.4	W=10	PWM=ATTGAAAATT.
-
-Selected k=6	hit=27	hgp=1e-12.7.
-----------------------------------------------
-
-k=6, mapped 927 k-mers, 42mils
-k=6, selected 13 k-mers from 42+/42- sequences, 12mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	25	24	5	-6.0
-AAAATT/AATTTT	18	20	5	-4.4
-ATCACA/TGTGAT	20	19	6	-3.5
-GAAAAT/ATTTTC	18	19	4	-4.6
-CAAAAT/ATTTTG	17	18	5	-3.7
-Seed k-mer:
-CATTTT/AAAATG	25	24	5	-6.0
-
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	25	24	5	-6.0
-AAAATT/AATTTT	18	20	5	-4.4
-ATCACA/TGTGAT	20	19	6	-3.5
-GAAAAT/ATTTTC	18	19	4	-4.6
-CAAAAT/ATTTTG	17	18	5	-3.7
-Seed k-mer:
-TCACTT/AAGTGA	13	11	0	-4.8
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_1 k-mer cluster #0, aligned 4 k-mers, 27 sequences.
-ATCACTTT
-C A  A  
-        
-        
-PWM threshold: 8.34/12.70, 	hit=27+/0-, hgp=1e-12.7
-KSM threshold: 3.27, 	hit=26+/2-, hgp=1e-9.6
---------------------------------------------------------------
-out_1 k-mer cluster #1, aligned 3 k-mers, 32 sequences.
-CATTTTCA
-      A 
-        
-        
-PWM threshold: 8.72/13.32, 	hit=31+/6-, hgp=1e-8.9
-KSM threshold: 4.60, 	hit=32+/6-, hgp=1e-9.5
---------------------------------------------------------------
-out_1 k-mer cluster #2, aligned 1 k-mers, 19 sequences.
-   |
-TTTGTTTT
-        
-        
-        
-PWM threshold: 8.40/13.66, 	hit=18+/6-, hgp=1e-3.2
-KSM threshold: 3.19, 	hit=15+/4-, hgp=1e-3.2
-
-Finish KMAC motif discovery, 2.2s
-
-============================ Round 2 ============================
-Running EM with motif positional prior ...
-Running with 8 threads ...
-100	/6343	10.1s
-1000	/6343	17.1s
-2000	/6343	19.1s
-3000	/6343	20.1s
-4000	/6343	21.1s
-5000	/6343	23.1s
-6000	/6343	25.1s
-6343	/6343	26.1s
----------------------------
-Events discovered 
-Significant:	127
-Insignificant:	184
-Filtered:	0
-
-Percentage of events with a k-mer match in 10 bins (~13 events per bin):
-38 76 61 53 53 61 84 76 69 80 
-
-Total 34 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 26.1s
-
-
-Warning: The read distribution is not updated, too few (127<500) significant events.
-Running KMAC motif discovery with 311+/52- sequences.
-
-k=6, mapped 848 k-mers, 147mils
-k=6, selected 6 k-mers from 311+/52- sequences, 17mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-AAAGTG/CACTTT	121	111	4	-5.8
-TCACTT/AAGTGA	96	92	1	-7.3
-TCACAT/ATGTGA	76	79	1	-6.1
-AAGTTA/TAACTT	60	57	0	-4.4
-ACTTTG/CAAAGT	49	43	0	-3.3
-Seed k-mer:
-TCACTT/AAGTGA	96	92	1	-7.3
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_2 k-mer cluster #0, aligned 3 k-mers, 220 sequences.
-TCACTT
-    A 
-      
-      
-PWM threshold: 8.29/10.91, 	hit=220+/6-, hgp=1e-16.7
-KSM threshold: 4.43, 	hit=208+/2-, hgp=1e-20.1
-
-Finish KMAC motif discovery, 374mils
-
-Finished! GEM analysis results are printed to:
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks/out_GEM_events.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks/out_KSM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks/out_PFM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks/out_result.htm
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks/out_outputs (folder with all other files)
-
-
-Total running time: 1.4m
-
-run_gem complete (81.96 sec)
-starting load_gem ... ChIP Peak Analysis (#41827, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_default_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
+starting load_genome ... NC_000913.2.gb
+load_genome complete (113.23 sec)
+starting write_chromosome_annotation_gff ...
+write_chromosome_annotation_gff complete (0.43 sec)
+starting load_raw_files ...
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (10.79 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (18.83 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (12.42 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (16.28 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (4.92 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (9.88 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (22.53 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (23.26 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (9.92 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (21.21 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (21.73 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.23 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (8.99 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.26 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (36.04 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (10.68 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (26.51 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (20.65 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (19.62 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.38 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (9.69 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.49 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (23.44 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (11.23 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (49.42 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (15.62 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.59 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (11.62 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (9.93 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (21.50 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (23.74 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.64 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.78 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (19.09 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.14 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (11.34 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (11.72 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (15.45 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.84 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.57 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (18.35 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (11.11 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.19 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (15.99 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (45.48 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (20.10 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (14.33 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (8.57 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (16.06 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (13.17 sec)
+starting load_raw_experiment_data ...
+load_raw_experiment_data complete (15.94 sec)
+load_raw_files complete (960.95 sec)
+starting load_raw_files ...
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.52 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.37 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.97 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.33 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.49 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.26 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.93 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.90 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.43 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.55 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.55 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.89 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.15 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (4.36 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.60 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.64 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.01 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (5.51 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.81 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.55 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.65 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.95 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (2.72 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.91 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (2.77 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (5.63 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.27 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (4.07 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.99 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.26 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (5.66 sec)
+starting load_raw_gff_to_db ...
+load_raw_gff_to_db complete (3.25 sec)
+load_raw_files complete (120.69 sec)
+starting load_raw_files ...
+load_raw_files complete (1.82 sec)
+starting load_raw_files ...
+load_raw_files complete (0.97 sec)
+starting load_raw_files ...
+load_raw_files complete (0.93 sec)
+starting load_metacyc_proteins ...
+MetaCyc issue, gene: EG11611 does not exist
+Exception, MetaCyc gene:b1016 not found in genbank
+Exception, MetaCyc gene:b4223 not found in genbank
+MetaCyc issue, gene: EG12238 does not exist
+MetaCyc issue, gene: G7392 does not exist
+Exception, MetaCyc gene:b1935 not found in genbank
+MetaCyc issue, gene: EG11992 does not exist
+Exception, MetaCyc gene:b0257 not found in genbank
+MetaCyc issue, gene: G7798 does not exist
+MetaCyc issue, gene: EG11386 does not exist
+MetaCyc issue, gene: EG11778 does not exist
+MetaCyc issue, gene: EG10010 does not exist
+MetaCyc issue, gene: EG12161 does not exist
+MetaCyc issue, gene: G6162 does not exist
+Exception, MetaCyc gene:b2680 not found in genbank
+MetaCyc issue, gene: G8204 does not exist
+Exception, MetaCyc gene:b2640 not found in genbank
+MetaCyc issue, gene: G6288 does not exist
+MetaCyc issue, gene: G0-10558 does not exist
+MetaCyc issue, gene: G0-10559 does not exist
+Exception, MetaCyc gene:b0362 not found in genbank
+MetaCyc issue, gene: G7903 does not exist
+MetaCyc issue, gene: EG12208 does not exist
+Exception, MetaCyc gene:b0012 not found in genbank
+MetaCyc issue, gene: G7053 does not exist
+Exception, MetaCyc gene:b1228 not found in genbank
+MetaCyc issue, gene: G6114 does not exist
+Exception, MetaCyc gene:b4610 not found in genbank
+Exception, MetaCyc gene:b4605 not found in genbank
+MetaCyc issue, gene: G6722 does not exist
+MetaCyc issue, gene: G6161 does not exist
+MetaCyc issue, gene: EG12103 does not exist
+MetaCyc issue, gene: G8221 does not exist
+Exception, MetaCyc gene:b4283 not found in genbank
+Exception, MetaCyc gene:b1510 not found in genbank
+Exception, MetaCyc gene:b1371 not found in genbank
+MetaCyc issue, gene: G7671 does not exist
+MetaCyc issue, gene: EG12857 does not exist
+Exception, MetaCyc gene:b4285 not found in genbank
+MetaCyc issue, gene: G6609 does not exist
+MetaCyc issue, gene: G7898 does not exist
+MetaCyc issue, gene: G7042 does not exist
+MetaCyc issue, gene: G0-10431 does not exist
+MetaCyc issue, gene: G7383 does not exist
+Exception, MetaCyc gene:b2639 not found in genbank
+Exception, MetaCyc gene:b1509 not found in genbank
+MetaCyc issue, gene: G7120 does not exist
+MetaCyc issue, gene: G6348 does not exist
+MetaCyc issue, gene: G7478 does not exist
+MetaCyc issue, gene: G6927 does not exist
+MetaCyc issue, gene: G7389 does not exist
+MetaCyc issue, gene: G7393 does not exist
+MetaCyc issue, gene: G7154 does not exist
+Exception, MetaCyc gene:b2862 not found in genbank
+MetaCyc issue, gene: G8209 does not exist
+MetaCyc issue, gene: G7052 does not exist
+MetaCyc issue, gene: G0-10557 does not exist
+MetaCyc issue, gene: G0-10556 does not exist
+Exception, MetaCyc gene:b0322 not found in genbank
+MetaCyc issue, gene: G0-10555 does not exist
+MetaCyc issue, gene: G0-10554 does not exist
+MetaCyc issue, gene: EG11777 does not exist
+MetaCyc issue, gene: G6632 does not exist
+Exception, MetaCyc gene:b3682 not found in genbank
+MetaCyc issue, gene: EG11986 does not exist
+MetaCyc issue, gene: G8208 does not exist
+Exception, MetaCyc gene:b1998 not found in genbank
+MetaCyc issue, gene: G7054 does not exist
+Exception, MetaCyc gene:b0255 not found in genbank
+MetaCyc issue, gene: G7155 does not exist
+Exception, MetaCyc gene:b1149 not found in genbank
+MetaCyc issue, gene: G6160 does not exist
+MetaCyc issue, gene: EG12226 does not exist
+MetaCyc issue, gene: G6535 does not exist
+MetaCyc issue, gene: G6610 does not exist
+MetaCyc issue, gene: G7041 does not exist
+MetaCyc issue, gene: EG11496 does not exist
+Exception, MetaCyc gene:b2087 not found in genbank
+MetaCyc issue, gene: G6163 does not exist
+Exception, MetaCyc gene:b2090 not found in genbank
+Exception, MetaCyc gene:b2087 not found in genbank
+MetaCyc issue, gene: G6113 does not exist
+Exception, MetaCyc gene:b3808 not found in genbank
+Exception, MetaCyc gene:b3036 not found in genbank
+Exception, MetaCyc gene:b4274 not found in genbank
+MetaCyc issue, gene: G6119 does not exist
+Exception, MetaCyc gene:b2649 not found in genbank
+MetaCyc issue, gene: G7557 does not exist
+Exception, MetaCyc gene:b2941 not found in genbank
+MetaCyc issue, gene: G7066 does not exist
+MetaCyc issue, gene: G7536 does not exist
+Exception, MetaCyc gene:b1016 not found in genbank
+MetaCyc issue, gene: G7760 does not exist
+Exception, MetaCyc gene:b0057 not found in genbank
+MetaCyc issue, gene: G7391 does not exist
+MetaCyc issue, gene: G7897 does not exist
+Exception, MetaCyc gene:b3776 not found in genbank
+MetaCyc issue, gene: G7556 does not exist
+Exception, MetaCyc gene:b1369 not found in genbank
+Exception, MetaCyc gene:b3682 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+MetaCyc issue, gene: EG10498 does not exist
+MetaCyc issue, gene: G7044 does not exist
+Exception, MetaCyc gene:b1142 not found in genbank
+MetaCyc issue, gene: G6926 does not exist
+Exception, MetaCyc gene:b2090 not found in genbank
+Exception, MetaCyc gene:b0374 not found in genbank
+Exception, MetaCyc gene:b2337 not found in genbank
+MetaCyc issue, gene: G7474 does not exist
+Exception, MetaCyc gene:b2857 not found in genbank
+MetaCyc issue, gene: G8205 does not exist
+MetaCyc issue, gene: G6376 does not exist
+MetaCyc issue, gene: G7822 does not exist
+MetaCyc issue, gene: G7065 does not exist
+load_metacyc_proteins complete (44.24 sec)
+starting load_metacyc_bindsites ...
+load_metacyc_bindsites complete (84.55 sec)
+starting load_metacyc_transcription_units ...
+Exception, MetaCyc gene:b1016 not found in genbank
+Exception, MetaCyc gene:b0257 not found in genbank
+Exception, MetaCyc gene:b0255 not found in genbank
+Exception, MetaCyc gene:b2401 not found in genbank
+Exception, MetaCyc gene:b2402 not found in genbank
+Exception, MetaCyc gene:b2403 not found in genbank
+Exception, MetaCyc gene:b2404 not found in genbank
+Exception, MetaCyc gene:b3272 not found in genbank
+Exception, MetaCyc gene:b3273 not found in genbank
+Exception, MetaCyc gene:b3274 not found in genbank
+Exception, MetaCyc gene:b3275 not found in genbank
+Exception, MetaCyc gene:b3276 not found in genbank
+Exception, MetaCyc gene:b3277 not found in genbank
+Exception, MetaCyc gene:b3278 not found in genbank
+Exception, MetaCyc gene:b2941 not found in genbank
+Exception, MetaCyc gene:b4454 not found in genbank
+Exception, MetaCyc gene:b1998 not found in genbank
+Exception, MetaCyc gene:b3782 not found in genbank
+Exception, MetaCyc gene:b4713 not found in genbank
+Exception, MetaCyc gene:b3808 not found in genbank
+Exception, MetaCyc gene:b3273 not found in genbank
+Exception, MetaCyc gene:b3272 not found in genbank
+Exception, MetaCyc gene:b4420 not found in genbank
+Exception, MetaCyc gene:b4691 not found in genbank
+Exception, MetaCyc gene:b4585 not found in genbank
+Exception, MetaCyc gene:b4417 not found in genbank
+Exception, MetaCyc gene:b3658 not found in genbank
+Exception, MetaCyc gene:b4704 not found in genbank
+Exception, MetaCyc gene:b4429 not found in genbank
+Exception, MetaCyc gene:b3036 not found in genbank
+Exception, MetaCyc gene:b3036 not found in genbank
+Exception, MetaCyc gene:b4422 not found in genbank
+Exception, MetaCyc gene:b2680 not found in genbank
+Exception, MetaCyc gene:b4616 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b4451 not found in genbank
+Exception, MetaCyc gene:b2911 not found in genbank
+Exception, MetaCyc gene:b2911 not found in genbank
+Exception, MetaCyc gene:b4426 not found in genbank
+Exception, MetaCyc gene:b0749 not found in genbank
+Exception, MetaCyc gene:b4443 not found in genbank
+Exception, MetaCyc gene:b4611 not found in genbank
+Exception, MetaCyc gene:b4446 not found in genbank
+Exception, MetaCyc gene:b4439 not found in genbank
+Exception, MetaCyc gene:b2649 not found in genbank
+Exception, MetaCyc gene:b2652 not found in genbank
+Exception, MetaCyc gene:b1230 not found in genbank
+Exception, MetaCyc gene:b4459 not found in genbank
+Exception, MetaCyc gene:b4449 not found in genbank
+Exception, MetaCyc gene:b4134 not found in genbank
+Exception, MetaCyc gene:b3036 not found in genbank
+Exception, MetaCyc gene:b4424 not found in genbank
+Exception, MetaCyc gene:b2397 not found in genbank
+Exception, MetaCyc gene:b2396 not found in genbank
+Exception, MetaCyc gene:b2397 not found in genbank
+Exception, MetaCyc gene:b2396 not found in genbank
+Exception, MetaCyc gene:b4624 not found in genbank
+Exception, MetaCyc gene:b4625 not found in genbank
+Exception, MetaCyc gene:b4608 not found in genbank
+Exception, MetaCyc gene:b4597 not found in genbank
+Exception, MetaCyc gene:b0012 not found in genbank
+Exception, MetaCyc gene:b0012 not found in genbank
+Exception, MetaCyc gene:b0206 not found in genbank
+Exception, MetaCyc gene:b3760 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b0748 not found in genbank
+Exception, MetaCyc gene:b4441 not found in genbank
+Exception, MetaCyc gene:b4577 not found in genbank
+Exception, MetaCyc gene:b0216 not found in genbank
+Exception, MetaCyc gene:b4441 not found in genbank
+Exception, MetaCyc gene:b4436 not found in genbank
+Exception, MetaCyc gene:b4437 not found in genbank
+Exception, MetaCyc gene:b4438 not found in genbank
+Exception, MetaCyc gene:b2348 not found in genbank
+Exception, MetaCyc gene:b3796 not found in genbank
+Exception, MetaCyc gene:b3797 not found in genbank
+Exception, MetaCyc gene:b3798 not found in genbank
+Exception, MetaCyc gene:b3799 not found in genbank
+Exception, MetaCyc gene:b3976 not found in genbank
+Exception, MetaCyc gene:b3977 not found in genbank
+Exception, MetaCyc gene:b3978 not found in genbank
+Exception, MetaCyc gene:b3979 not found in genbank
+Exception, MetaCyc gene:b0664 not found in genbank
+Exception, MetaCyc gene:b0665 not found in genbank
+Exception, MetaCyc gene:b0666 not found in genbank
+Exception, MetaCyc gene:b0668 not found in genbank
+Exception, MetaCyc gene:b0670 not found in genbank
+Exception, MetaCyc gene:b0672 not found in genbank
+Exception, MetaCyc gene:b0673 not found in genbank
+Exception, MetaCyc gene:b4270 not found in genbank
+Exception, MetaCyc gene:b0971 not found in genbank
+Exception, MetaCyc gene:b0883 not found in genbank
+Exception, MetaCyc gene:b4274 not found in genbank
+Exception, MetaCyc gene:b4285 not found in genbank
+Exception, MetaCyc gene:b4414 not found in genbank
+Exception, MetaCyc gene:b4283 not found in genbank
+Exception, MetaCyc gene:b1510 not found in genbank
+Exception, MetaCyc gene:b3864 not found in genbank
+Exception, MetaCyc gene:b4458 not found in genbank
+Exception, MetaCyc gene:b4452 not found in genbank
+Exception, MetaCyc gene:b3174 not found in genbank
+Exception, MetaCyc gene:b3174 not found in genbank
+Exception, MetaCyc gene:b0455 not found in genbank
+Exception, MetaCyc gene:b3174 not found in genbank
+Exception, MetaCyc gene:b3545 not found in genbank
+Exception, MetaCyc gene:b2864 not found in genbank
+Exception, MetaCyc gene:b3171 not found in genbank
+Exception, MetaCyc gene:b2396 not found in genbank
+Exception, MetaCyc gene:b2397 not found in genbank
+Exception, MetaCyc gene:b2691 not found in genbank
+Exception, MetaCyc gene:b2692 not found in genbank
+Exception, MetaCyc gene:b2693 not found in genbank
+Exception, MetaCyc gene:b2694 not found in genbank
+Exception, MetaCyc gene:b2695 not found in genbank
+Exception, MetaCyc gene:b1975 not found in genbank
+Exception, MetaCyc gene:b1032 not found in genbank
+Exception, MetaCyc gene:b1230 not found in genbank
+Exception, MetaCyc gene:b1231 not found in genbank
+Exception, MetaCyc gene:b0057 not found in genbank
+Exception, MetaCyc gene:b4712 not found in genbank
+Exception, MetaCyc gene:b2814 not found in genbank
+Exception, MetaCyc gene:b2815 not found in genbank
+Exception, MetaCyc gene:b2816 not found in genbank
+Exception, MetaCyc gene:b2189 not found in genbank
+Exception, MetaCyc gene:b4456 not found in genbank
+Exception, MetaCyc gene:b4431 not found in genbank
+Exception, MetaCyc gene:b4442 not found in genbank
+Exception, MetaCyc gene:b1228 not found in genbank
+Exception, MetaCyc gene:b4425 not found in genbank
+Exception, MetaCyc gene:b0362 not found in genbank
+Exception, MetaCyc gene:b1509 not found in genbank
+Exception, MetaCyc gene:b1910 not found in genbank
+Exception, MetaCyc gene:b1909 not found in genbank
+Exception, MetaCyc gene:b2397 not found in genbank
+Exception, MetaCyc gene:b2396 not found in genbank
+Exception, MetaCyc gene:b4430 not found in genbank
+Exception, MetaCyc gene:b3776 not found in genbank
+Exception, MetaCyc gene:b2967 not found in genbank
+Exception, MetaCyc gene:b4368 not found in genbank
+Exception, MetaCyc gene:b4369 not found in genbank
+Exception, MetaCyc gene:b4370 not found in genbank
+Exception, MetaCyc gene:b0743 not found in genbank
+Exception, MetaCyc gene:b0744 not found in genbank
+Exception, MetaCyc gene:b0745 not found in genbank
+Exception, MetaCyc gene:b4430 not found in genbank
+Exception, MetaCyc gene:b2864 not found in genbank
+Exception, MetaCyc gene:b2691 not found in genbank
+Exception, MetaCyc gene:b2588 not found in genbank
+Exception, MetaCyc gene:b4444 not found in genbank
+Exception, MetaCyc gene:b4445 not found in genbank
+Exception, MetaCyc gene:b2911 not found in genbank
+Exception, MetaCyc gene:b1954 not found in genbank
+Exception, MetaCyc gene:b4603 not found in genbank
+Exception, MetaCyc gene:b4368 not found in genbank
+Exception, MetaCyc gene:b4707 not found in genbank
+Exception, MetaCyc gene:b4416 not found in genbank
+Exception, MetaCyc gene:b1149 not found in genbank
+Exception, MetaCyc gene:b3171 not found in genbank
+Exception, MetaCyc gene:b3171 not found in genbank
+Exception, MetaCyc gene:b2857 not found in genbank
+Exception, MetaCyc gene:b2862 not found in genbank
+Exception, MetaCyc gene:b0205 not found in genbank
+Exception, MetaCyc gene:b0204 not found in genbank
+Exception, MetaCyc gene:b3971 not found in genbank
+Exception, MetaCyc gene:b3970 not found in genbank
+Exception, MetaCyc gene:b3971 not found in genbank
+Exception, MetaCyc gene:b3970 not found in genbank
+Exception, MetaCyc gene:b3969 not found in genbank
+Exception, MetaCyc gene:b3968 not found in genbank
+Exception, MetaCyc gene:b3761 not found in genbank
+Exception, MetaCyc gene:b4433 not found in genbank
+Exception, MetaCyc gene:b1984 not found in genbank
+Exception, MetaCyc gene:b4435 not found in genbank
+Exception, MetaCyc gene:b3682 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b1470 not found in genbank
+Exception, MetaCyc gene:b0455 not found in genbank
+Exception, MetaCyc gene:b1574 not found in genbank
+Exception, MetaCyc gene:b2588 not found in genbank
+Exception, MetaCyc gene:b2589 not found in genbank
+Exception, MetaCyc gene:b2590 not found in genbank
+Exception, MetaCyc gene:b2591 not found in genbank
+Exception, MetaCyc gene:b0205 not found in genbank
+Exception, MetaCyc gene:b0204 not found in genbank
+Exception, MetaCyc gene:b0203 not found in genbank
+Exception, MetaCyc gene:b0202 not found in genbank
+Exception, MetaCyc gene:b0201 not found in genbank
+Exception, MetaCyc gene:b4010 not found in genbank
+Exception, MetaCyc gene:b4009 not found in genbank
+Exception, MetaCyc gene:b4008 not found in genbank
+Exception, MetaCyc gene:b4007 not found in genbank
+Exception, MetaCyc gene:b2588 not found in genbank
+Exception, MetaCyc gene:b2589 not found in genbank
+Exception, MetaCyc gene:b2590 not found in genbank
+Exception, MetaCyc gene:b2591 not found in genbank
+Exception, MetaCyc gene:b3759 not found in genbank
+Exception, MetaCyc gene:b3758 not found in genbank
+Exception, MetaCyc gene:b3757 not found in genbank
+Exception, MetaCyc gene:b3756 not found in genbank
+Exception, MetaCyc gene:b3971 not found in genbank
+Exception, MetaCyc gene:b3970 not found in genbank
+Exception, MetaCyc gene:b3969 not found in genbank
+Exception, MetaCyc gene:b3968 not found in genbank
+Exception, MetaCyc gene:b3759 not found in genbank
+Exception, MetaCyc gene:b3758 not found in genbank
+Exception, MetaCyc gene:b3757 not found in genbank
+Exception, MetaCyc gene:b3756 not found in genbank
+Exception, MetaCyc gene:b3855 not found in genbank
+Exception, MetaCyc gene:b3854 not found in genbank
+Exception, MetaCyc gene:b3853 not found in genbank
+Exception, MetaCyc gene:b3852 not found in genbank
+Exception, MetaCyc gene:b3851 not found in genbank
+Exception, MetaCyc gene:b1369 not found in genbank
+Exception, MetaCyc gene:b1149 not found in genbank
+Exception, MetaCyc gene:b4010 not found in genbank
+Exception, MetaCyc gene:b4009 not found in genbank
+Exception, MetaCyc gene:b3855 not found in genbank
+Exception, MetaCyc gene:b3854 not found in genbank
+Exception, MetaCyc gene:b4413 not found in genbank
+Exception, MetaCyc gene:b0374 not found in genbank
+Exception, MetaCyc gene:b2087 not found in genbank
+Exception, MetaCyc gene:b4434 not found in genbank
+Exception, MetaCyc gene:b0664 not found in genbank
+Exception, MetaCyc gene:b0665 not found in genbank
+Exception, MetaCyc gene:b0666 not found in genbank
+Exception, MetaCyc gene:b0668 not found in genbank
+Exception, MetaCyc gene:b4408 not found in genbank
+Exception, MetaCyc gene:b1371 not found in genbank
+Exception, MetaCyc gene:b4447 not found in genbank
+Exception, MetaCyc gene:b0205 not found in genbank
+Exception, MetaCyc gene:b0204 not found in genbank
+Exception, MetaCyc gene:b0203 not found in genbank
+Exception, MetaCyc gene:b0202 not found in genbank
+Exception, MetaCyc gene:b0201 not found in genbank
+Exception, MetaCyc gene:b3272 not found in genbank
+Exception, MetaCyc gene:b3273 not found in genbank
+Exception, MetaCyc gene:b3274 not found in genbank
+Exception, MetaCyc gene:b3275 not found in genbank
+Exception, MetaCyc gene:b3276 not found in genbank
+Exception, MetaCyc gene:b3277 not found in genbank
+Exception, MetaCyc gene:b3278 not found in genbank
+Exception, MetaCyc gene:b4699 not found in genbank
+Exception, MetaCyc gene:b4698 not found in genbank
+Exception, MetaCyc gene:b3036 not found in genbank
+Exception, MetaCyc gene:b1142 not found in genbank
+Exception, MetaCyc gene:b2090 not found in genbank
+Exception, MetaCyc gene:b4223 not found in genbank
+Exception, MetaCyc gene:b3171 not found in genbank
+Exception, MetaCyc gene:b1665 not found in genbank
+Exception, MetaCyc gene:b1666 not found in genbank
+Exception, MetaCyc gene:b0536 not found in genbank
+Exception, MetaCyc gene:b1977 not found in genbank
+Exception, MetaCyc gene:b1989 not found in genbank
+Exception, MetaCyc gene:b1986 not found in genbank
+Exception, MetaCyc gene:b1935 not found in genbank
+Exception, MetaCyc gene:b0322 not found in genbank
+Exception, MetaCyc gene:b1909 not found in genbank
+Exception, MetaCyc gene:b1910 not found in genbank
+Exception, MetaCyc gene:b1911 not found in genbank
+Exception, MetaCyc gene:b4440 not found in genbank
+Exception, MetaCyc gene:b3069 not found in genbank
+Exception, MetaCyc gene:b4609 not found in genbank
+Exception, MetaCyc gene:b4163 not found in genbank
+Exception, MetaCyc gene:b4164 not found in genbank
+Exception, MetaCyc gene:b4165 not found in genbank
+Exception, MetaCyc gene:b2911 not found in genbank
+Exception, MetaCyc gene:b4450 not found in genbank
+Exception, MetaCyc gene:b4427 not found in genbank
+Exception, MetaCyc gene:b0747 not found in genbank
+Exception, MetaCyc gene:b0746 not found in genbank
+Exception, MetaCyc gene:b2621 not found in genbank
+Exception, MetaCyc gene:b2337 not found in genbank
+Exception, MetaCyc gene:b3855 not found in genbank
+Exception, MetaCyc gene:b3854 not found in genbank
+Exception, MetaCyc gene:b3853 not found in genbank
+Exception, MetaCyc gene:b3852 not found in genbank
+Exception, MetaCyc gene:b3851 not found in genbank
+Exception, MetaCyc gene:b4010 not found in genbank
+Exception, MetaCyc gene:b4009 not found in genbank
+Exception, MetaCyc gene:b4008 not found in genbank
+Exception, MetaCyc gene:b4007 not found in genbank
+Exception, MetaCyc gene:b0455 not found in genbank
+Exception, MetaCyc gene:b3782 not found in genbank
+Exception, MetaCyc gene:b3171 not found in genbank
+Exception, MetaCyc gene:b4457 not found in genbank
+Exception, MetaCyc gene:b3123 not found in genbank
+Exception, MetaCyc gene:b3123 not found in genbank
+Exception, MetaCyc gene:b4432 not found in genbank
+Exception, MetaCyc gene:b2639 not found in genbank
+Exception, MetaCyc gene:b2640 not found in genbank
+Exception, MetaCyc gene:b0244 not found in genbank
+Exception, MetaCyc gene:b4418 not found in genbank
+Exception, MetaCyc gene:b2621 not found in genbank
+load_metacyc_transcription_units complete (113.60 sec)
+starting run_gem ...
+run_gem complete (0.05 sec)
+starting run_gem ...
+run_gem complete (0.02 sec)
+starting run_gem ...
+run_gem complete (0.00 sec)
+starting run_gem ...
+run_gem complete (0.00 sec)
+starting run_gem ...
+run_gem complete (0.02 sec)
+starting run_gem ...
+run_gem complete (0.02 sec)
+starting run_gem ...
+run_gem complete (0.02 sec)
+starting load_gem ...
+load_gem complete (0.23 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (9.26 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.13 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
 load_gem complete (0.20 sec)
-starting run_gem ... ChIP Peak Analysis (#41828, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_default_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-
-Welcome to GEM (version 2.3)!
-
-Please cite: 
-Yuchun Guo, Shaun Mahony, David K. Gifford (2012) PLoS Computational Biology 8(8): e1002638. 
-High Resolution Genome Wide Binding Event Finding and Motif Discovery Reveals Transcription Factor Spatial Binding Constraints. 
-doi:10.1371/journal.pcbi.1002638
-
-Gifford Laboratory at MIT (http://cgs.csail.mit.edu/gem/).
-
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-myc
-Loading reads from: ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-myc.bam ... Loaded
-
-Options:
---d /Users/sfederow/libraries/gem/Read_Distribution_ChIP-exo.txt --g /Volumes/extra/Dropbox/ome_data/annotation/ec_mg1655.sizes --genome /Volumes/extra/Dropbox/ome_data/annotation --exptChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-myc /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-myc.bam --f SAM --k_win 150 --smooth 3 --nrf --nf --k_min 4 --q 1.3 --k_max 22 --outNP --mrc 20 
-
-Mappable Genome Length is 3,711,740.
-
-Getting 5' positions of all reads...
-ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_1_anti-myc_IP  	Bases: 1203946	HitCounts: 4025132.0
-
-At Poisson p-value 1.0e-03, in a 301bp window, expect 384 reads.
-
-
-Sorting reads and selecting enriched regions ...
-
-The genome is segmented into 6403 regions for analysis.
-
-============================ Round 0 ============================
-Running with 8 threads ...
-100	/6403	17.1s
-1000	/6403	35.1s
-2000	/6403	46.1s
-3000	/6403	52.1s
-4000	/6403	55.1s
-5000	/6403	56.1s
-6000	/6403	57.1s
-6403	/6403	1.0m
----------------------------
-Events discovered 
-Significant:	48
-Insignificant:	0
-Filtered:	0
-
-Total 19 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 1.0m
-
-
-Warning: The read distribution is not updated, too few (48<500) significant events.
-
-============================ Round 1 ============================
-Running with 8 threads ...
-100	/6403	2.0s
-1000	/6403	8.0s
-2000	/6403	13.0s
-3000	/6403	18.1s
-4000	/6403	25.1s
-5000	/6403	34.1s
-6000	/6403	46.1s
-6403	/6403	49.1s
----------------------------
-Events discovered 
-Significant:	48
-Insignificant:	0
-Filtered:	0
-
-Total 19 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 49.3s
-
-
-Warning: The read distribution is not updated, too few (48<500) significant events.
-Loading genome sequences ...
-Done, 207mils
-GC content=0.50
-
-Running KMAC motif discovery with 48+/48- sequences.
-
-
-----------------------------------------------
-Trying k=4 ...
-
-k=4, mapped 0 k-mers, 50mils
-k=4, selected 0 k-mers from 48+/48- sequences, 8mils
-
-----------------------------------------------
-Trying k=5 ...
-
-k=5, mapped 140 k-mers, 47mils
-k=5, selected 6 k-mers from 48+/48- sequences, 35mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-TCACA/TGTGA	36	38	9	-10.0
-AATTA/TAATT	26	26	4	-7.2
-CACAT/ATGTG	24	24	8	-4.0
-CATAA/TTATG	21	22	7	-3.8
-TCACT/AGTGA	22	21	7	-3.5
-Seed k-mer:
-TCACA/TGTGA	36	38	9	-10.0
-
-
-----------------------------------------------
-Trying k=6 ...
-
-k=6, mapped 1043 k-mers, 61mils
-k=6, selected 27 k-mers from 48+/48- sequences, 38mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	29	30	3	-10.1
-AAAAAT/ATTTTT	26	25	7	-4.9
-ATCACA/TGTGAT	22	24	5	-5.7
-TAAAAA/TTTTTA	22	23	6	-4.7
-ACATTT/AAATGT	18	21	3	-5.9
-Seed k-mer:
-CATTTT/AAAATG	29	30	3	-10.1
-
-
-----------------------------------------------
-Trying k=7 ...
-
-k=7, mapped 703 k-mers, 67mils
-k=7, selected 21 k-mers from 48+/48- sequences, 24mils
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-AAAAATG/CATTTTT	16	16	1	-5.9
-AAAATGT/ACATTTT	13	14	1	-5.1
-TCACAAA/TTTGTGA	11	13	2	-3.7
-TTGTGAT/ATCACAA	11	12	2	-3.4
-AAACAAA/TTTGTTT	9	10	1	-3.6
-Seed k-mer:
-AAAAATG/CATTTTT	16	16	1	-5.9
-
-
-----------------------------------------------
-Trying k=8 ...
-
-k=8, mapped 266 k-mers, 42mils
-k=8, selected 4 k-mers from 48+/48- sequences, 4mils
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-ATCACAAA/TTTGTGAT	9	11	1	-4.0
-GATCACAA/TTGTGATC	7	9	0	-4.0
-TCACAAAA/TTTTGTGA	7	9	1	-3.2
-CACATTTT/AAAATGTG	7	8	0	-3.6
-Seed k-mer:
-ATCACAAA/TTTGTGAT	9	11	1	-4.0
-
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-ATCACAAA/TTTGTGAT	9	11	1	-4.0
-GATCACAA/TTGTGATC	7	9	0	-4.0
-TCACAAAA/TTTTGTGA	7	9	1	-3.2
-CACATTTT/AAAATGTG	7	8	0	-3.6
-Seed k-mer:
-CACATTTT/AAAATGTG	7	8	0	-3.6
-
-
-----------------------------------------------
-Trying k=9 ...
-
-k=9, mapped 73 k-mers, 45mils
-k=9, selected 2 k-mers from 48+/48- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.       	PosCt	wPosCt	NegCt	HGP_10
-GATCACAAA/TTTGTGATC	6	8	0	-3.6
-ATCACAAAA/TTTTGTGAT	6	7	0	-3.2
-Seed k-mer:
-GATCACAAA/TTTGTGATC	6	8	0	-3.6
-
-
-----------------------------------------------
-Trying k=10 ...
-
-k=10, mapped 19 k-mers, 58mils
-k=10, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=11 ...
-
-k=11, mapped 5 k-mers, 46mils
-k=11, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=12 ...
-
-k=12, mapped 0 k-mers, 45mils
-k=12, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=13 ...
-
-k=13, mapped 0 k-mers, 45mils
-k=13, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=14 ...
-
-k=14, mapped 0 k-mers, 45mils
-k=14, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=15 ...
-
-k=15, mapped 0 k-mers, 46mils
-k=15, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=16 ...
-
-k=16, mapped 0 k-mers, 45mils
-k=16, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=17 ...
-
-k=17, mapped 0 k-mers, 45mils
-k=17, selected 0 k-mers from 48+/48- sequences, 0mils
-
-----------------------------------------------
-Trying k=18 ...
-
-k=18, mapped 0 k-mers, 49mils
-k=18, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=19 ...
-
-k=19, mapped 0 k-mers, 49mils
-k=19, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=20 ...
-
-k=20, mapped 0 k-mers, 45mils
-k=20, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=21 ...
-
-k=21, mapped 0 k-mers, 44mils
-k=21, selected 0 k-mers from 48+/48- sequences, 1mils
-
-----------------------------------------------
-Trying k=22 ...
-
-k=22, mapped 0 k-mers, 46mils
-k=22, selected 0 k-mers from 48+/48- sequences, 0mils
-
-------------------- out_1 ----------------------
-k=4	can not form a PWM.
-k=5	hit=36	hgp=1e-8.8	W=6	PWM=ATCACA.
-k=6	hit=29	hgp=1e-9.5	W=6	PWM=CATTTT.
-k=7	hit=29	hgp=1e-9.5	W=7	PWM=AAAAATG.
-k=8	hit=22	hgp=1e-6.3	W=8	PWM=CACATTTT.
-k=9	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=10	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=11	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=12	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=13	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=14	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=15	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=16	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=17	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=18	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=19	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=20	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=21	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-k=22	hit=12	hgp=1e-5.1	W=9	PWM=GATCACAAA.
-
-Selected k=6	hit=29	hgp=1e-9.5.
-----------------------------------------------
-
-k=6, mapped 1043 k-mers, 45mils
-k=6, selected 27 k-mers from 48+/48- sequences, 21mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	29	30	3	-10.1
-AAAAAT/ATTTTT	26	25	7	-4.9
-ATCACA/TGTGAT	22	24	5	-5.7
-TAAAAA/TTTTTA	22	23	6	-4.7
-ACATTT/AAATGT	18	21	3	-5.9
-Seed k-mer:
-CATTTT/AAAATG	29	30	3	-10.1
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_1 k-mer cluster #0, aligned 3 k-mers, 29 sequences.
-   |
-CATTTT
-      
-      
-      
-PWM threshold: 11.66/11.66, 	hit=29+/3-, hgp=1e-9.5
-KSM threshold: 5.91, 	hit=34+/5-, hgp=1e-10.5
---------------------------------------------------------------
-out_1 k-mer cluster #1, aligned 3 k-mers, 25 sequences.
-       |
-AATTGTT
-    A G
-       
-       
-PWM threshold: 7.39/11.79, 	hit=25+/2-, hgp=1e-8.6
-KSM threshold: 3.24, 	hit=25+/2-, hgp=1e-8.6
---------------------------------------------------------------
-out_1 k-mer cluster #2, aligned 4 k-mers, 30 sequences.
-ATCACA
-      
-      
-      
-PWM threshold: 7.79/11.47, 	hit=30+/6-, hgp=1e-7.6
-KSM threshold: 3.06, 	hit=34+/7-, hgp=1e-9.0
---------------------------------------------------------------
-out_1 k-mer cluster #3, aligned 2 k-mers, 16 sequences.
-ACAATA
-    C 
-      
-      
-PWM threshold: 6.60/10.48, 	hit=19+/2-, hgp=1e-6.0
-KSM threshold: 3.24, 	hit=16+/2-, hgp=1e-4.8
---------------------------------------------------------------
-out_1 k-mer cluster #4, aligned 1 k-mers, 10 sequences.
-            |
-CGTGAT
-      
-      
-      
-PWM threshold: 7.27/10.91, 	hit=12+/0-, hgp=1e-5.1
-KSM threshold: 3.95, 	hit=9+/0-, hgp=1e-4.0
---------------------------------------------------------------
-out_1 k-mer cluster #5, aligned 1 k-mers, 11 sequences.
-TCACTT
-      
-      
-      
-PWM threshold: 11.18/11.18, 	hit=11+/1-, hgp=1e-4.0
-KSM threshold: 3.95, 	hit=11+/1-, hgp=1e-4.0
---------------------------------------------------------------
-out_1 k-mer cluster #6, aligned 1 k-mers, 10 sequences.
-                   |
-GATTTAGT
-        
-        
-        
-PWM threshold: 8.73/14.18, 	hit=12+/2-, hgp=1e-3.4
-KSM threshold: 3.24, 	hit=7+/0-, hgp=1e-3.2
-
-Finish KMAC motif discovery, 2.8s
-
-============================ Round 2 ============================
-Running EM with motif positional prior ...
-Running with 8 threads ...
-100	/6403	16.0s
-1000	/6403	24.1s
-2000	/6403	29.1s
-3000	/6403	34.1s
-4000	/6403	41.1s
-5000	/6403	49.1s
-6000	/6403	59.1s
-6403	/6403	1.0m
----------------------------
-Events discovered 
-Significant:	65
-Insignificant:	61
-Filtered:	0
-
-Percentage of events with a k-mer match in 10 bins (~7 events per bin):
-14 42 57 28 0 42 14 28 14 0 
-
-Total 21 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 1.0m
-
-
-Warning: The read distribution is not updated, too few (65<500) significant events.
-Running KMAC motif discovery with 126+/68- sequences.
-
-k=6, mapped 834 k-mers, 96mils
-k=6, selected 31 k-mers from 126+/68- sequences, 17mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	96	87	6	-17.7
-ATTTTT/AAAAAT	59	62	8	-8.1
-ACATTT/AAATGT	42	50	6	-6.6
-GAAAAT/ATTTTC	51	50	6	-6.6
-TGTGAT/ATCACA	31	46	5	-6.4
-Seed k-mer:
-CATTTT/AAAATG	96	87	6	-17.7
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_2 k-mer cluster #0, aligned 5 k-mers, 96 sequences.
-   |
-CATTTT
-      
-      
-      
-PWM threshold: 11.85/11.85, 	hit=96+/6-, hgp=1e-21.6
-KSM threshold: 6.57, 	hit=106+/14-, hgp=1e-19.1
---------------------------------------------------------------
-out_2 k-mer cluster #1, aligned 1 k-mers, 14 sequences.
-ACAATG
-      
-      
-      
-PWM threshold: 7.53/11.30, 	hit=25+/1-, hgp=1e-5.3
-KSM threshold: 3.15, 	hit=15+/1-, hgp=1e-3.2
---------------------------------------------------------------
-out_2 k-mer cluster #2, aligned 2 k-mers, 37 sequences.
- |
-TAATTT
-      
-      
-      
-PWM threshold: 7.48/11.39, 	hit=41+/5-, hgp=1e-5.3
-KSM threshold: 3.15, 	hit=43+/3-, hgp=1e-7.3
---------------------------------------------------------------
-out_2 k-mer cluster #3, aligned 2 k-mers, 42 sequences.
-         |
-TGTGAT
-      
-      
-      
-PWM threshold: 7.57/11.70, 	hit=44+/6-, hgp=1e-5.3
-KSM threshold: 4.22, 	hit=55+/6-, hgp=1e-7.7
---------------------------------------------------------------
-out_2 k-mer cluster #4, aligned 1 k-mers, 10 sequences.
-GACAAG
-      
-      
-      
-PWM threshold: 7.41/11.11, 	hit=21+/1-, hgp=1e-4.4
-KSM threshold: 3.15, 	hit=15+/1-, hgp=1e-3.2
---------------------------------------------------------------
-out_2 k-mer cluster #5, aligned 1 k-mers, 22 sequences.
-                |
-TTGTTT
-      
-      
-      
-PWM threshold: 7.65/11.47, 	hit=24+/2-, hgp=1e-4.0
-KSM threshold: 5.32, 	hit=30+/2-, hgp=1e-5.3
---------------------------------------------------------------
-out_2 k-mer cluster #6, aligned 1 k-mers, 20 sequences.
-CACAGAATA
-      GG 
-         
-         
-PWM threshold: 8.83/14.31, 	hit=18+/1-, hgp=1e-3.8
-KSM threshold: 3.57, 	hit=15+/0-, hgp=1e-3.6
---------------------------------------------------------------
-out_2 k-mer cluster #7, aligned 1 k-mers, 15 sequences.
-      |
-TCACTT
-      
-      
-      
-PWM threshold: 7.59/11.38, 	hit=20+/2-, hgp=1e-3.2
-KSM threshold: 3.25, 	hit=20+/2-, hgp=1e-3.2
---------------------------------------------------------------
-out_2 k-mer cluster #8, aligned 1 k-mers, 26 sequences.
-             |
-TGAAAT
-      
-      
-      
-PWM threshold: 7.72/11.58, 	hit=29+/5-, hgp=1e-3.0
-KSM threshold: 3.40, 	hit=28+/4-, hgp=1e-3.4
---------------------------------------------------------------
-out_2 k-mer cluster #9, aligned 1 k-mers, 13 sequences.
- |
-TATAAT
-      
-      
-      
-PWM threshold: 7.49/11.23, 	hit=14+/1-, hgp=1e-2.9
-KSM threshold: 4.00, 	hit=19+/1-, hgp=1e-4.0
-
-Finish KMAC motif discovery, 3.2s
-
-Finished! GEM analysis results are printed to:
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks/out_GEM_events.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks/out_KSM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks/out_PFM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks/out_result.htm
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks/out_outputs (folder with all other files)
-
-
-Total running time: 3.4m
-
-run_gem complete (202.09 sec)
-starting load_gem ... ChIP Peak Analysis (#41828, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_default_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-load_gem complete (0.22 sec)
-starting run_gem ... ChIP Peak Analysis (#41829, ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_default_peaks): Environment: C:glucose, N:NH4Cl, e:O2 
-
-Welcome to GEM (version 2.3)!
-
-Please cite: 
-Yuchun Guo, Shaun Mahony, David K. Gifford (2012) PLoS Computational Biology 8(8): e1002638. 
-High Resolution Genome Wide Binding Event Finding and Motif Discovery Reveals Transcription Factor Spatial Binding Constraints. 
-doi:10.1371/journal.pcbi.1002638
-
-Gifford Laboratory at MIT (http://cgs.csail.mit.edu/gem/).
-
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_1_anti-myc
-Loading reads from: ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_1_anti-myc.bam ... Loaded
-Loading data...
-    loading condition: ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_2_anti-myc
-Loading reads from: ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_2_anti-myc.bam ... Loaded
-
-Options:
---d /Users/sfederow/libraries/gem/Read_Distribution_ChIP-exo.txt --g /Volumes/extra/Dropbox/ome_data/annotation/ec_mg1655.sizes --genome /Volumes/extra/Dropbox/ome_data/annotation --exptChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_1_anti-myc /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_1_anti-myc.bam --exptChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_2_anti-myc /Volumes/extra/Dropbox/ome_data/chip_experiment/bam/crp/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_2_anti-myc.bam --f SAM --k_win 150 --smooth 3 --nrf --nf --k_min 4 --q 1.3 --k_max 22 --outNP --mrc 20 
-
-Mappable Genome Length is 3,711,740.
-
-Getting 5' positions of all reads...
-ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_1_anti-myc_IP  	Bases: 1446930	HitCounts: 2255477.0
-ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_2_anti-myc_IP  	Bases: 783164	HitCounts: 948241.0
-
-Normalizing read counts across multiple conditions ...
-
-At Poisson p-value 1.0e-03, in a 301bp window, expect 311 reads.
-
-
-Sorting reads and selecting enriched regions ...
-
-The genome is segmented into 6371 regions for analysis.
-
-============================ Round 0 ============================
-Running with 8 threads ...
-100	/6371	23.1s
-1000	/6371	1.1m
-2000	/6371	1.5m
-3000	/6371	1.8m
-4000	/6371	1.9m
-5000	/6371	2.0m
-6000	/6371	2.0m
-6371	/6371	2.1m
----------------------------
-Events discovered 
-Significant:	36
-Insignificant:	0
-Filtered:	0
-
-Total 14 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 2.1m
-
-
-Warning: The read distribution is not updated, too few (36<500) significant events.
-
-============================ Round 1 ============================
-Running with 8 threads ...
-100	/6371	2.0s
-1000	/6371	17.1s
-2000	/6371	31.1s
-3000	/6371	45.1s
-4000	/6371	1.0m
-5000	/6371	1.4m
-6000	/6371	1.7m
-6371	/6371	1.9m
----------------------------
-Events discovered 
-Significant:	36
-Insignificant:	0
-Filtered:	0
-
-Total 14 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 1.9m
-
-
-Warning: The read distribution is not updated, too few (36<500) significant events.
-Loading genome sequences ...
-Done, 221mils
-GC content=0.50
-
-Running KMAC motif discovery with 36+/36- sequences.
-
-
-----------------------------------------------
-Trying k=4 ...
-
-k=4, mapped 0 k-mers, 44mils
-k=4, selected 0 k-mers from 36+/36- sequences, 8mils
-
-----------------------------------------------
-Trying k=5 ...
-
-k=5, mapped 166 k-mers, 47mils
-k=5, selected 10 k-mers from 36+/36- sequences, 27mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-TCACA/TGTGA	31	32	6	-11.2
-AATTT/AAATT	25	25	6	-6.3
-ATGTG/CACAT	23	23	7	-4.8
-TTTGA/TCAAA	20	20	6	-4.1
-AATTA/TAATT	19	19	6	-3.7
-Seed k-mer:
-TCACA/TGTGA	31	32	6	-11.2
-
-
-----------------------------------------------
-Trying k=6 ...
-
-k=6, mapped 791 k-mers, 49mils
-k=6, selected 16 k-mers from 36+/36- sequences, 20mils
-
-Top 5 k-mers
-# k-mer/r.c. 	PosCt	wPosCt	NegCt	HGP_10
-CATTTT/AAAATG	19	20	3	-6.0
-ATCACA/TGTGAT	16	19	1	-7.6
-ATTTTT/AAAAAT	19	18	4	-4.4
-TCACAT/ATGTGA	16	16	1	-6.2
-AATTTT/AAAATT	13	14	3	-3.6
-Seed k-mer:
-ATCACA/TGTGAT	16	19	1	-7.6
-
-
-----------------------------------------------
-Trying k=7 ...
-
-k=7, mapped 443 k-mers, 56mils
-k=7, selected 8 k-mers from 36+/36- sequences, 13mils
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-CATTTTT/AAAAATG	13	13	0	-5.8
-AGATCAC/GTGATCT	10	11	0	-4.9
-TTGTGAT/ATCACAA	8	11	0	-4.9
-AAATGTG/CACATTT	9	9	0	-4.1
-ATCACAT/ATGTGAT	8	9	0	-4.1
-Seed k-mer:
-CATTTTT/AAAAATG	13	13	0	-5.8
-
-
-Top 5 k-mers
-# k-mer/r.c.   	PosCt	wPosCt	NegCt	HGP_10
-CATTTTT/AAAAATG	13	13	0	-5.8
-AGATCAC/GTGATCT	10	11	0	-4.9
-TTGTGAT/ATCACAA	8	11	0	-4.9
-AAATGTG/CACATTT	9	9	0	-4.1
-ATCACAT/ATGTGAT	8	9	0	-4.1
-Seed k-mer:
-AGATCAC/GTGATCT	10	11	0	-4.9
-
-
-----------------------------------------------
-Trying k=8 ...
-
-k=8, mapped 167 k-mers, 41mils
-k=8, selected 4 k-mers from 36+/36- sequences, 3mils
-
-Top 5 k-mers
-# k-mer/r.c.     	PosCt	wPosCt	NegCt	HGP_10
-ATCACAAA/TTTGTGAT	7	9	0	-4.1
-AGATCACA/TGTGATCT	7	8	0	-3.7
-TCACATTT/AAATGTGA	8	8	0	-3.7
-ACATTTAA/TTAAATGT	5	7	0	-3.3
-Seed k-mer:
-ATCACAAA/TTTGTGAT	7	9	0	-4.1
-
-
-----------------------------------------------
-Trying k=9 ...
-
-k=9, mapped 68 k-mers, 40mils
-k=9, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=10 ...
-
-k=10, mapped 34 k-mers, 36mils
-k=10, selected 0 k-mers from 36+/36- sequences, 2mils
-
-----------------------------------------------
-Trying k=11 ...
-
-k=11, mapped 23 k-mers, 39mils
-k=11, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=12 ...
-
-k=12, mapped 15 k-mers, 33mils
-k=12, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=13 ...
-
-k=13, mapped 13 k-mers, 33mils
-k=13, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=14 ...
-
-k=14, mapped 11 k-mers, 33mils
-k=14, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=15 ...
-
-k=15, mapped 9 k-mers, 33mils
-k=15, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=16 ...
-
-k=16, mapped 8 k-mers, 33mils
-k=16, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=17 ...
-
-k=17, mapped 7 k-mers, 33mils
-k=17, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=18 ...
-
-k=18, mapped 6 k-mers, 33mils
-k=18, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=19 ...
-
-k=19, mapped 5 k-mers, 36mils
-k=19, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=20 ...
-
-k=20, mapped 4 k-mers, 35mils
-k=20, selected 0 k-mers from 36+/36- sequences, 1mils
-
-----------------------------------------------
-Trying k=21 ...
-
-k=21, mapped 3 k-mers, 34mils
-k=21, selected 0 k-mers from 36+/36- sequences, 0mils
-
-----------------------------------------------
-Trying k=22 ...
-
-k=22, mapped 2 k-mers, 33mils
-k=22, selected 0 k-mers from 36+/36- sequences, 0mils
-
-------------------- out_1 ----------------------
-k=4	can not form a PWM.
-k=5	hit=32	hgp=1e-11.2	W=6	PWM=ATCACA.
-k=6	hit=22	hgp=1e-8.0	W=6	PWM=ATCACA.
-k=7	hit=15	hgp=1e-6.7	W=9	PWM=AAGATCACA.
-k=8	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=9	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=10	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=11	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=12	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=13	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=14	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=15	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=16	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=17	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=18	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=19	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=20	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=21	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-k=22	hit=15	hgp=1e-5.8	W=9	PWM=GATCACAAA.
-
-Selected k=5	hit=32	hgp=1e-11.2.
-----------------------------------------------
-
-k=5, mapped 166 k-mers, 32mils
-k=5, selected 10 k-mers from 36+/36- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-TCACA/TGTGA	31	32	6	-11.2
-AATTT/AAATT	25	25	6	-6.3
-ATGTG/CACAT	23	23	7	-4.8
-TTTGA/TCAAA	20	20	6	-4.1
-AATTA/TAATT	19	19	6	-3.7
-Seed k-mer:
-TCACA/TGTGA	31	32	6	-11.2
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_1 k-mer cluster #0, aligned 2 k-mers, 32 sequences.
-ATCACA
-      
-      
-      
-PWM threshold: 7.33/10.91, 	hit=32+/6-, hgp=1e-11.2
-KSM threshold: 7.79, 	hit=32+/6-, hgp=1e-11.2
---------------------------------------------------------------
-out_1 k-mer cluster #1, aligned 1 k-mers, 25 sequences.
-          |
-AATTT
-     
-     
-     
-PWM threshold: 9.62/9.62, 	hit=23+/6-, hgp=1e-5.4
-KSM threshold: 6.34, 	hit=25+/6-, hgp=1e-6.3
---------------------------------------------------------------
-out_1 k-mer cluster #2, aligned 1 k-mers, 11 sequences.
-TTTTAG
-      
-      
-      
-PWM threshold: 6.68/10.38, 	hit=17+/3-, hgp=1e-4.7
-KSM threshold: 3.91, 	hit=13+/2-, hgp=1e-3.9
---------------------------------------------------------------
-out_1 k-mer cluster #3, aligned 1 k-mers, 10 sequences.
-CACGTC
-      
-      
-      
-PWM threshold: 8.52/10.90, 	hit=10+/0-, hgp=1e-4.5
-KSM threshold: 4.09, 	hit=9+/0-, hgp=1e-4.1
---------------------------------------------------------------
-out_1 k-mer cluster #4, aligned 1 k-mers, 14 sequences.
-       |
-TATGC
-     
-     
-     
-PWM threshold: 7.53/9.41, 	hit=14+/3-, hgp=1e-3.6
-KSM threshold: 3.93, 	hit=15+/3-, hgp=1e-3.9
-
-Finish KMAC motif discovery, 2.2s
-
-============================ Round 2 ============================
-Running EM with motif positional prior ...
-Running with 8 threads ...
-100	/6371	19.1s
-1000	/6371	29.1s
-2000	/6371	39.1s
-3000	/6371	49.1s
-4000	/6371	1.0m
-5000	/6371	1.2m
-6000	/6371	1.5m
-6371	/6371	1.6m
----------------------------
-Events discovered 
-Significant:	72
-Insignificant:	44
-Filtered:	0
-
-Percentage of events with a k-mer match in 10 bins (~8 events per bin):
-62 87 62 62 62 62 75 37 75 
-
-Total 21 homotypic events (within 500bp of other events).
-
-Finish binding event prediction: 1.6m
-
-
-Warning: The read distribution is not updated, too few (72<500) significant events.
-Running KMAC motif discovery with 116+/50- sequences.
-
-k=5, mapped 145 k-mers, 78mils
-k=5, selected 8 k-mers from 116+/50- sequences, 2mils
-
-Top 5 k-mers
-# k-mer/r.c.	PosCt	wPosCt	NegCt	HGP_10
-TCACA/TGTGA	111	109	7	-26.3
-AATTT/AAATT	59	68	8	-7.6
-CACAA/TTGTG	65	66	7	-7.8
-ATTTG/CAAAT	41	45	6	-4.2
-TAATT/AATTA	37	45	6	-4.2
-Seed k-mer:
-TCACA/TGTGA	111	109	7	-26.3
-
-
-Compute motif distance distribution ...
-
---------------------------------------------------------------
-out_2 k-mer cluster #0, aligned 2 k-mers, 111 sequences.
-TCACA
-     
-     
-     
-PWM threshold: 9.94/9.94, 	hit=111+/7-, hgp=1e-28.1
-KSM threshold: 21.68, 	hit=109+/7-, hgp=1e-26.3
---------------------------------------------------------------
-out_2 k-mer cluster #1, aligned 2 k-mers, 70 sequences.
-        |
-AATTT
-     
-     
-     
-PWM threshold: 5.97/9.68, 	hit=71+/12-, hgp=1e-5.8
-KSM threshold: 4.19, 	hit=80+/12-, hgp=1e-8.0
---------------------------------------------------------------
-out_2 k-mer cluster #2, aligned 1 k-mers, 31 sequences.
-   |
-CTAAAACA
-     TAC
-        
-        
-PWM threshold: 7.80/11.79, 	hit=32+/3-, hgp=1e-3.9
-KSM threshold: 4.77, 	hit=41+/4-, hgp=1e-4.8
-
-Finish KMAC motif discovery, 952mils
-
-Finished! GEM analysis results are printed to:
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_GEM_events.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_KSM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_PFM.txt
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_result.htm
-/Volumes/extra/Dropbox (UCSD SBRG)/ome_data/ChIP_peaks/gem/ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks/out_outputs (folder with all other files)
-
-
-Total running time: 6.0m
-
-run_gem complete (358.41 sec)
-starting load_gem ... ChIP Peak Analysis (#41829, ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_default_peaks): Environment: C:glucose, N:NH4Cl, e:O2 
-load_gem complete (0.18 sec)
-starting run_gem ... ChIP Peak Analysis (#41830, ChIPchip-Crp_Crp8myc_acetate_NH4CL_O2_anti-myc_default_peaks): Environment: C:acetate, N:NH4CL, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#41830, ChIPchip-Crp_Crp8myc_acetate_NH4CL_O2_anti-myc_default_peaks): Environment: C:acetate, N:NH4CL, e:O2 
+starting load_gem ...
 load_gem complete (0.00 sec)
-starting run_gem ... ChIP Peak Analysis (#41831, ChIPchip-Crp_Crp8myc_fructose_NH4CL_O2_anti-myc_default_peaks): Environment: C:fructose, N:NH4CL, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#41831, ChIPchip-Crp_Crp8myc_fructose_NH4CL_O2_anti-myc_default_peaks): Environment: C:fructose, N:NH4CL, e:O2 
-load_gem complete (0.00 sec)
-starting run_gem ... ChIP Peak Analysis (#71676, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#71676, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-crp_q-1.3_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
+starting load_gem ...
+load_gem complete (0.25 sec)
+starting load_gem ...
 load_gem complete (0.35 sec)
-starting run_gem ... ChIP Peak Analysis (#71677, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#71677, ChIPExo-Crp_Crp8myc_fructose_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:fructose, N:NH4Cl, e:O2 
-load_gem complete (0.15 sec)
-starting run_gem ... ChIP Peak Analysis (#71678, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#71678, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-crp_q-1.3_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-load_gem complete (0.36 sec)
-starting run_gem ... ChIP Peak Analysis (#71679, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#71679, ChIPExo-Crp_Crp8myc_glycerol_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:glycerol, N:NH4Cl, e:O2 
-load_gem complete (0.40 sec)
-starting run_gem ... ChIP Peak Analysis (#71680, ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:glucose, N:NH4Cl, e:O2 
-run_gem complete (0.00 sec)
-starting load_gem ... ChIP Peak Analysis (#71680, ChIPExo-Crp_Crp8myc_glucose_NH4Cl_O2_anti-myc_q-1.3_peaks): Environment: C:glucose, N:NH4Cl, e:O2 
-load_gem complete (0.31 sec)
+starting load_gem ...
+load_gem complete (1.71 sec)
+starting load_gem ...
+load_gem complete (11.83 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.82 sec)
+starting load_gem ...
+load_gem complete (0.35 sec)
+starting load_gem ...
+load_gem complete (0.65 sec)
+starting load_gem ...
+load_gem complete (1.28 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (1.69 sec)
+starting load_gem ...
+load_gem complete (0.47 sec)
+starting load_gem ...
+load_gem complete (0.38 sec)
+starting load_gem ...
+load_gem complete (12.06 sec)
+starting load_gem ...
+load_gem complete (1.23 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.30 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.55 sec)
+starting load_gem ...
+load_gem complete (0.00 sec)
+starting load_gem ...
+load_gem complete (0.51 sec)
+starting load_gem ...
+load_gem complete (0.21 sec)
+starting load_gem ...
+load_gem complete (0.44 sec)
+starting load_gem ...
+load_gem complete (0.38 sec)
+starting load_gem ...
+load_gem complete (0.47 sec)
+starting load_gem ...
+load_gem complete (0.50 sec)
+starting load_gff_chip_peaks ...
+load_gff_chip_peaks complete (9.32 sec)
+starting load_extra_analyses ...
+load_extra_analyses complete (0.31 sec)
+starting load_gff_chip_peaks ...
+load_gff_chip_peaks complete (6.60 sec)
+starting load_kegg_pathways ...
+load_kegg_pathways complete (12.89 sec)
+starting load_cuffnorm ...
+load_cuffnorm complete (52.12 sec)
+starting load_cuffdiff ...
+load_cuffdiff complete (92.34 sec)
+starting load_arraydata ...
+affyexp_wt_glucose_NH4CL_O2_10.CEL
+affyexp_wt_glucose_NH4CL_O2_11.CEL
+affyexp_wt_glucose_NH4CL_O2_12.CEL
+affyexp_wt_glucose_NH4CL_O2_13.CEL
+affyexp_wt_glucose_NH4CL_O2_14.CEL
+affyexp_wt_glucose_NH4CL_O2_15.CEL
+affyexp_wt_glucose_NH4CL_anaerobic_10.CEL
+affyexp_wt_glucose_NH4CL_anaerobic_7.CEL
+affyexp_wt_glucose_NH4CL_anaerobic_8.CEL
+affyexp_wt_glucose_NH4CL_anaerobic_9.CEL
+load_arraydata complete (89.37 sec)
+starting load_arraydata ...
+affyexp_wt_glucose_NH4CL_O2_4.CEL
+affyexp_wt_glucose_NH4CL_O2_5.CEL
+affyexp_wt_glucose_NH4CL_O2_6.CEL
+affyexp_wt_glucose_NH4CL_O2_7.CEL
+affyexp_wt_glucose_NH4CL_O2_8.CEL
+affyexp_wt_glucose_NH4CL_O2_9.CEL
+load_arraydata complete (68.16 sec)
+starting run_array_ttests ...
+/usr/local/lib/python2.7/site-packages/scipy/stats/stats.py:3226: RuntimeWarning: invalid value encountered in divide
+  t = np.divide(d, denom)
+/usr/local/lib/python2.7/site-packages/scipy/stats/_distn_infrastructure.py:1718: RuntimeWarning: invalid value encountered in greater
+  cond1 = (scale > 0) & (x > self.a) & (x < self.b)
+/usr/local/lib/python2.7/site-packages/scipy/stats/_distn_infrastructure.py:1718: RuntimeWarning: invalid value encountered in less
+  cond1 = (scale > 0) & (x > self.a) & (x < self.b)
+/usr/local/lib/python2.7/site-packages/scipy/stats/_distn_infrastructure.py:1719: RuntimeWarning: invalid value encountered in less_equal
+  cond2 = cond0 & (x <= self.a)
+/Users/sfederow/ome/ome/ome/loading/dataset_loading.py:791: RuntimeWarning: invalid value encountered in greater
+  q[q > 1] = 1.0  # maximum value is 1
+/usr/local/lib/python2.7/site-packages/scipy/stats/stats.py:3226: RuntimeWarning: divide by zero encountered in divide
+  t = np.divide(d, denom)
+run_array_ttests complete (39.98 sec)
+starting run_array_ttests ...
+run_array_ttests complete (43.67 sec)
+starting make_genome_region_map ...
+make_genome_region_map complete (251.42 sec)
+starting load_model ... iSF_1195
+Genbank file PRJNA310 for model iSF_1195 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... RECON1
+Genbank file PRJNA168 for model RECON1 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iJN746
+Genbank file PRJNA57843 for model iJN746 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iIT341
+Genbank file PRJNA57787 for model iIT341 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iNJ661
+Genbank file PRJNA57777 for model iNJ661 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iAPECO1_1312
+Genbank file PRJNA16718 for model iAPECO1_1312 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iJO1366
+close
+load_model complete (166.42 sec)
+starting load_model ... iBWG_1329
+Genbank file PRJNA59391 for model iBWG_1329 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... ic_1306
+Genbank file PRJNA57915 for model ic_1306 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iE2348C_1286
+Genbank file PRJNA59343 for model iE2348C_1286 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEC042_1314
+Genbank file PRJEA40647 for model iEC042_1314 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEC55989_1330
+Genbank file PRJNA33413 for model iEC55989_1330 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECABU_c1320
+Genbank file PRJNA38725 for model iECABU_c1320 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECB_1328
+Genbank file PRJNA18281 for model iECB_1328 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECBD_1354
+Genbank file PRJNA30681 for model iECBD_1354 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECD_1391
+Genbank file PRJNA20713 for model iECD_1391 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEcDH1_1363
+Genbank file PRJNA30031 for model iEcDH1_1363 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECDH1ME8569_1439
+Genbank file PRJDA52077 for model iECDH1ME8569_1439 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECDH10B
+Genbank file PRJNA20079 for model iECDH10B was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEcE24377_1341
+Genbank file PRJNA13960 for model iEcE24377_1341 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECED1_1282
+Genbank file PRJNA33409 for model iECED1_1282 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECH74115_1262
+Genbank file PRJNA27739 for model iECH74115_1262 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEcHS_1320
+Genbank file PRJNA13959 for model iEcHS_1320 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECIAI1_1343
+Genbank file PRJNA33373 for model iECIAI1_1343 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECIAI39_1322
+Genbank file PRJNA33411 for model iECIAI39_1322 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECNA114_1301
+Genbank file PRJNA66975 for model iECNA114_1301 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECO103_1326
+Genbank file PRJDA32511 for model iECO103_1326 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECO111_1330
+Genbank file PRJDA32513 for model iECO111_1330 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECO26_1355
+Genbank file PRJDA32509 for model iECO26_1355 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECOK1_1307
+Genbank file PRJNA43693 for model iECOK1_1307 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEcolC_1368
+Genbank file PRJNA18083 for model iEcolC_1368 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECP_1309
+Genbank file PRJNA16235 for model iECP_1309 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECS88_1305
+Genbank file PRJNA33375 for model iECS88_1305 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECs_1301
+Genbank file PRJNA226 for model iECs_1301 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECSE_1348
+Genbank file PRJNA18057 for model iECSE_1348 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECSF_1327
+Genbank file PRJDA19053 for model iECSF_1327 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEcSMS35_1347
+Genbank file PRJNA19469 for model iEcSMS35_1347 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECSP_1301
+Genbank file PRJNA30045 for model iECSP_1301 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECUMN_1333
+Genbank file PRJNA33415 for model iECUMN_1333 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iECW_1372
+Genbank file PRJNA48011 for model iECW_1372 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iEKO11_1354
+Genbank file PRJNA33875 for model iEKO11_1354 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iETEC_1333
+Genbank file PRJEA42749 for model iETEC_1333 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iG2583_1286
+Genbank file PRJNA42729 for model iG2583_1286 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iLF82_1304
+Genbank file PRJNA33825 for model iLF82_1304 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iNRG857_1313
+Genbank file PRJNA41221 for model iNRG857_1313 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iS_1188
+Genbank file PRJNA408 for model iS_1188 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSbBS512_1146
+Genbank file PRJNA15637 for model iSbBS512_1146 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSBO_1134
+Genbank file PRJNA13146 for model iSBO_1134 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSDY_1059
+Genbank file PRJNA13145 for model iSDY_1059 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSFV_1184
+Genbank file PRJNA16375 for model iSFV_1184 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSFxv_1172
+Genbank file PRJNA33639 for model iSFxv_1172 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iSSON_1240
+Genbank file PRJNA13151 for model iSSON_1240 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iUMN146_1321
+Genbank file PRJNA50883 for model iUMN146_1321 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iUMNK88_1353
+Genbank file PRJNA42137 for model iUMNK88_1353 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iUTI89_1310
+Genbank file PRJNA16259 for model iUTI89_1310 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iWFL_1372
+Genbank file PRJNA62301 for model iWFL_1372 was not uploaded
+close
+load_model complete (0.00 sec)
+starting load_model ... iZ_1308
+Genbank file PRJNA259 for model iZ_1308 was not uploaded
+close
+load_model complete (0.00 sec)

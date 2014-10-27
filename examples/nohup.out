@@ -10885,3 +10885,10 @@ Traceback (most recent call last):
   File "/usr/local/lib/python2.7/site-packages/tornado/concurrent.py", line 111, in result
     raise self._exception
 SSLError: [Errno 1] _ssl.c:510: error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request
+2014-10-26 18:21:14.228 [NotebookApp] Using existing profile dir: u'/Users/sfederow/.ipython/profile_nbserver'
+2014-10-26 18:21:14.254 [NotebookApp] Using MathJax from CDN: https://cdn.mathjax.org/mathjax/latest/MathJax.js
+2014-10-26 18:21:14.674 [NotebookApp] The port 8888 is already in use, trying another random port.
+2014-10-26 18:21:14.675 [NotebookApp] Serving notebooks from local directory: /Users/sfederow/ome/ome/examples
+2014-10-26 18:21:14.675 [NotebookApp] 0 active kernels 
+2014-10-26 18:21:14.675 [NotebookApp] The IPython Notebook is running at: https://[all ip addresses on your system]:8889/
+2014-10-26 18:21:14.675 [NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
