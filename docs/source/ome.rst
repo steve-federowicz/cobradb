@@ -1,57 +1,24 @@
-ome
+ome package
 ===========
+
+Subpackages
+-----------
 
 .. toctree::
 
     ome.loading
 
-ome.base
+Module contents
 ---------------
 
-.. automodule:: ome.base
+.. automodule:: ome
     :members:
     :undoc-members:
     :show-inheritance:
+.. toctree::
 
-ome.components
----------------------
 
-.. automodule:: ome.components
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
-ome.data
----------------
-
-.. automodule:: ome.data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ome.model
-----------------
-
-.. automodule:: ome.model
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ome.settings
--------------------
-
-.. automodule:: ome.settings
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ome.util
----------------
-
-.. automodule:: ome.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 
 Module contents
