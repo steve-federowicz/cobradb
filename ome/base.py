@@ -1,5 +1,3 @@
-"""Module to implement ORM to the ome database"""
-
 from types import MethodType
 from os import system
 
@@ -31,6 +29,8 @@ except Exception as e:
 
 
 class Genome(Base):
+    """Genome is an sqalchemy class which implements the Genome table in SQL
+    """
     __tablename__ = 'genome'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
@@ -49,6 +49,8 @@ class Genome(Base):
 
 
 class Chromosome(Base):
+    """Chromosome is an sqalchemy class which implements the Chromosome table in SQL
+    """
     __tablename__ = 'chromosome'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
@@ -71,6 +73,8 @@ class Chromosome(Base):
 
 
 class GenomeRegion(Base):
+    """GenomeRegion is an sqalchemy class which implements the GenomeRegion table in SQL
+    """
     __tablename__ = 'genome_region'
     id = Column(Integer, Sequence('wids'), primary_key=True)
     chromosome_id = Column(Integer, ForeignKey('chromosome.id'))
@@ -100,6 +104,8 @@ class GenomeRegion(Base):
 
 
 class Component(Base):
+    """Component is an sqalchemy class which implements the Component table in SQL
+    """
     __tablename__ = 'component'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
@@ -123,6 +129,8 @@ class Component(Base):
 
 
 class Reaction(Base):
+    """Reaction is an sqalchemy class which implements the Reaction table in SQL
+    """
     __tablename__ = 'reaction'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
@@ -149,6 +157,8 @@ class Reaction(Base):
 
 
 class DataSource(Base):
+    """DataSource is an sqalchemy class which implements the DataSource table in SQL
+    """
     __tablename__ = 'data_source'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
@@ -175,6 +185,8 @@ class DataSource(Base):
 
 
 class Synonyms(Base):
+    """Synonyms is an sqalchemy class which implements the synonyms table in SQL
+    """
     __tablename__ = "synonyms"
     id = Column(Integer, Sequence('wids'), primary_key=True)
     ome_id = Column(Integer)
@@ -197,6 +209,8 @@ class Synonyms(Base):
 
 
 class GenomeRegionMap(Base):
+	"""GenomeRegionMap is an sqalchemy class used to speed up queries when joining multiple instances of GenomeRegion
+    	"""
         __tablename__ = 'genome_region_map'
 
         genome_region_id_1 = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
