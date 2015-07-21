@@ -8,7 +8,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   modules.rst
+   ome
 
 .. automodule:: datasets
  
