@@ -15,15 +15,3 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
-
-
-
-
-
-Module contents
----------------
-
-.. automodule:: ome
-    :members:
-    :undoc-members:
-    :show-inheritance:
