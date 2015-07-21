@@ -1,10 +1,7 @@
-.. ome documentation master file, created by
-   sphinx-quickstart on Wed Aug 27 14:55:47 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to The OME Frameworks's documentation!
 ===============================================
+For installation instructions, please see `INSTALL.md
+<https://github.com/steve-federowicz/ome/blob/master/INSTALL.md>`_.
 
 Contents:
 
@@ -28,27 +25,6 @@ Indices and tables
 * :ref:`search`
 
 
-
-Installation
-============
-
-The OME Framework runs on Python 2.x and can be installed with pip on linux or OSX::
-
-
-    sudo pip install ome
-
-
-
-If you are intending to load a lot of models and data, you should also install postgres and mongodb
-
-
-On linux::
-
-    sudo apt-get install postgres-server postgres mongodb
-
-On OSX with homebrew http://brew.sh/::
-
-    brew install postgres mongodb
 
 
 
