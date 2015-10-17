@@ -39,13 +39,8 @@ class Genome(Base):
 
     __table_args__ = (UniqueConstraint('bioproject_id'),{})
 
-
     def __repr__(self):
         return "Genome (#%d) %s %s" % (self.id, self.bioproject_id, self.organism)
-
-    def __init__(self, bioproject_id, organism):
-        self.bioproject_id = bioproject_id
-        self.organism = organism
 
 
 class Chromosome(Base):
@@ -64,12 +59,6 @@ class Chromosome(Base):
 
     def __repr__(self):
         return "Chromosome %s -- %s" % (self.ncbi_id, self.genome)
-
-
-    def __init__(self, genome_id, genbank_id, ncbi_id):
-        self.genome_id = genome_id
-        self.genbank_id = genbank_id
-        self.ncbi_id = ncbi_id
 
 
 class GenomeRegion(Base):
@@ -95,14 +84,6 @@ class GenomeRegion(Base):
                 (self.leftpos, self.rightpos, self.strand)
 
 
-    def __init__(self, leftpos, rightpos, strand, chromosome_id, name=None):
-        self.leftpos = leftpos
-        self.rightpos = rightpos
-        self.strand = strand
-        self.chromosome_id = chromosome_id
-        self.name = name
-
-
 class Component(Base):
     """Component is an sqalchemy class which implements the Component table in SQL
     """
@@ -120,9 +101,6 @@ class Component(Base):
                        'polymorphic_on': type
                       }
 
-    def __init__(self, name):
-        self.name = name
-
     def __repr__(self):
         return "Component (#%d):  %s" % \
             (self.id, self.name)
@@ -139,17 +117,12 @@ class Reaction(Base):
     long_name = Column(String)
     type = Column(String(20))
     notes = Column(String)
+
     __table_args__ = (UniqueConstraint('name'),{})
 
     __mapper_args__ = {'polymorphic_identity': 'reaction',
                        'polymorphic_on': type
                       }
-
-    def __init__(self, name, long_name, notes, biggid=""):
-        self.name = name
-        self.biggid = biggid
-        self.long_name = long_name
-        self.notes = notes
 
     def __repr__(self):
         return "Reaction (#%d):  %s" % \
@@ -178,11 +151,6 @@ class DataSource(Base):
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
 
-    def __init__(self, name, lab=None, institution=None):
-        self.name = name
-        self.lab = lab
-        self.institution = institution
-
 
 class Synonyms(Base):
     """Synonyms is an sqalchemy class which implements the synonyms table in SQL
@@ -195,17 +163,10 @@ class Synonyms(Base):
     synonym_data_source_id = Column(Integer, ForeignKey('data_source.id', ondelete='CASCADE'))
     synonym_data_source = relationship("DataSource")
 
-
     __table_args__ = (UniqueConstraint('ome_id','synonym','type'),{})
 
     def __repr__(self):
         return "%s in (%s)" % (self.synonym, self.synonym_data_source)
-
-    def __init__(self, ome_id, synonym, type, synonym_data_source_id):
-        self.ome_id = ome_id
-        self.synonym = synonym
-        self.type = type
-        self.synonym_data_source_id = synonym_data_source_id
 
 
 class GenomeRegionMap(Base):
@@ -219,15 +180,8 @@ class GenomeRegionMap(Base):
 
         __table_args__ = (UniqueConstraint('genome_region_id_1','genome_region_id_2'),{})
 
-
         def __repr__(self):
             return "GenomeRegionMap (%d <--> %d) distance:%d" % (self.genome_region_id_1, self.genome_region_id_2, self.distance)
-
-
-        def __init__(self, genome_region_id_1, genome_region_id_2, distance):
-            self.genome_region_id_1 = genome_region_id_1
-            self.genome_region_id_2 = genome_region_id_2
-            self.distance = distance
 
 
 class _Session(_SA_Session):
@@ -251,14 +205,10 @@ class _Session(_SA_Session):
     The Session will automatically set the search_path to settings.schema
     """
 
-
     def __init__(self, *args, **kwargs):
         super(_Session, self).__init__(*args, **kwargs)
-        #self.execute("set search_path to %s;" % (settings.schema))
         self.commit()
         self.get_or_create = MethodType(get_or_create, self)
-        #self.search_by_synonym = MethodType(search_by_synonym, self)
-
 
     def __repr__(self):
         return "OME session %d" % (self.__hash__())
@@ -295,23 +245,37 @@ def get_or_create(session, class_type, **kwargs):
     return result
 
 
-def update(session, object, **kwargs):
-    """Ideally this would only search on the primary key columns so
-    that an update could be made in one call. However, its not currently
-    clear how to do that so necessary to pass in the actual object and
-    update following a call to get_or_create() There is probably some
-    way to do this with class_mapper but its hard right now
+def upsert(session, class_type, **kwargs):
+    """Gets an object using filter_by on the unique kwargs and then updates
+    any fields of the object to the new values. If no such object
+    is found in the database, a new one will be created which satisfies
+    these constraints. This is why every class that wants to use this
+    method to be instantiated needs to have a UniqueConstraint defined.
     """
-    #result = session.query(class_type).filter_by(**kwargs).first()
-    #result = session.query(class_type).filter_by(name=kwargs['name']).first()
-    #if result is None: return
 
-    for key,value in kwargs.iteritems():
-        setattr(object,key,value)
-    session.add(object)
-    session.commit()
+    for constraint in list(class_type.__table_args__):
+        if constraint.__class__.__name__ == 'UniqueConstraint':
+            unique_cols = constraint.columns.keys()
 
-    return object
+    inherited_result = True
+    if '__mapper_args__' in class_type.__dict__ and 'inherits' in class_type.__mapper_args__:
+        inherited_class_type = class_type.__mapper_args__['inherits']
+        for constraint in list(inherited_class_type.__table_args__):
+            if constraint.__class__.__name__ == 'UniqueConstraint':
+                        inherited_unique_cols = constraint.columns.keys()
+
+        inherited_result = session.query(inherited_class_type).filter_by(**{k: kwargs[k] for k in inherited_unique_cols}).first()
+
+    session.query(class_type).filter_by(**{k: kwargs[k] for k in unique_cols}).update({k:v for k,v in kwargs.items()})
+    
+    result = session.query(class_type).filter_by(**{k: kwargs[k] for k in unique_cols}).first()
+    
+    if not result or not inherited_result:
+        result = class_type(**kwargs)
+        session.add(result)
+        session.commit()
+
+    return result
 
 
 @contextmanager
