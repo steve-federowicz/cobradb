@@ -183,6 +183,7 @@ class Comments(Base):
     type = Column(String)
     url = Column(String)
 
+
 class ModelCount(Base):
     __tablename__='model_count'
     id = Column(Integer, primary_key=True)
@@ -192,3 +193,4 @@ class ModelCount(Base):
     reaction_count = Column(Integer)
     gene_count = Column(Integer)
     metabolite_count = Column(Integer)
+    
