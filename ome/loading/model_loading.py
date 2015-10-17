@@ -1,22 +1,29 @@
 # -*- coding: utf-8 -*-
-# This code is primarily a merger of theseus.models by @zakandrewking and LoadTheseus by @jslu9
+
 from ome import base, settings, components, timing
+from ome.loading import AlreadyLoadedError
+from ome.dumping.model_dumping import dump_model
+from ome.base import *
 from ome.models import *
-from ome.loading import component_loading
+from ome.components import *
+from ome.loading import parse
+from ome.util import (increment_id, check_pseudoreaction, load_tsv,
+                      get_or_create_data_source, format_formula, scrub_name,
+                      check_none)
 
-
-import cobra
-import cobra.io
-from cobra.core.Formula import Formula
-import os
-from os.path import join, abspath, dirname
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy import func
 import re
-import cPickle as pickle
+import logging
+from collections import defaultdict
+import os
+from os.path import join, basename, abspath, dirname
+from itertools import ifilter
+import cobra.io
 
-from sqlalchemy import create_engine, Table, MetaData, update
 
-
-data_path = settings.data_directory
+class GenbankNotFound(Exception):
+    pass
 
 
 def get_model_list():
@@ -24,6 +31,7 @@ def get_model_list():
     return [x.replace('.xml', '').replace('.mat', '') for x in
             os.listdir(join(settings.data_directory, 'models'))
             if '.xml' in x or '.mat' in x]
+
 
 def check_for_model(name):
     """Check for model, case insensitive, and ignore periods and underscores"""
@@ -34,538 +42,931 @@ def check_for_model(name):
             return x
     return None
 
-# the regex to separate the base id, the chirality ('_L') and the compartment ('_c')
-reg = re.compile(r'(.*?)(?:(.*[^_])_([LDSR]))?[_\(\[]([a-z])[_\)\]]?$')
-def id_for_new_id_style(old_id, is_metabolite=False, new_id_style='cobrapy'):
-    """ Get the new style id"""
-
-    def join_parts(the_id, the_compartment):
-        if (new_id_style.lower()=='cobrapy'):
-            if the_compartment:
-                the_id = the_id+'_'+the_compartment
-            the_id = the_id.replace('-', '__')
-        elif (new_id_style.lower()=='simpheny'):
-            if the_compartment and is_metabolite:
-                the_id = the_id+'['+the_compartment+']'
-            elif the_compartment:
-                the_id = the_id+'('+the_compartment+')'
-            the_id = the_id.replace('__', '-')
-        else:
-            raise Exception('Invalid id style')
-        return the_id
-
-    # separate the base id, the chirality ('_L') and the compartment ('_c')
-    m = reg.match(old_id)
-    if m is None:
-        # still change the underscore/dash
-        new_id = join_parts(old_id, None)
-    elif m.group(2) is None:
-        new_id = join_parts(m.group(1), m.group(4))
-    else:
-        # if the chirality is not joined by two underscores, then fix that
-        a = "__".join(m.groups()[1:3])
-        new_id = join_parts(a, m.group(4))
-
-    # deal with inconsistent notation of (sec) vs. [sec] in iJO1366 versions
-    new_id = new_id.replace('[sec]', '_sec_').replace('(sec)', '_sec_')
-
-    return new_id
-
-def convert_ids(model, new_id_style):
-    """Converts metabolite and reaction ids to the new style. Style options:
-
-    cobrapy: EX_lac__L_e
-    simpheny: EX_lac-L(e)
-
-    """
-    # loop through the ids:
-
-    # this code comes from cobra.io.sbml
-    # legacy_ids add special characters to the names again
-    for metabolite in model.metabolites:
-        metabolite.id = fix_legacy_id(metabolite.id, use_hyphens=False)
-    model.metabolites._generate_index()
-    for reaction in model.reactions:
-        reaction.id = fix_legacy_id(reaction.id, use_hyphens=False)
-    model.reactions._generate_index()
-    # remove boundary metabolites (end in _b and only present in exchanges) . Be
-    # sure to loop through a static list of ids so the list does not get
-    # shorter as the metabolites are deleted
-    for metabolite_id in [str(x) for x in model.metabolites]:
-        metabolite = model.metabolites.get_by_id(metabolite_id)
-        if not metabolite.id.endswith("_b"):
-            continue
-        for reaction in list(metabolite._reaction):
-            if reaction.id.startswith("EX_"):
-                metabolite.remove_from_model()
-                break
-    model.metabolites._generate_index()
-
-    # separate ids and compartments, and convert to the new_id_style
-    for reaction in model.reactions:
-        reaction.id = id_for_new_id_style(reaction.id, new_id_style=new_id_style)
-    model.reactions._generate_index()
-    for metabolite in model.metabolites:
-        metabolite.id = id_for_new_id_style(metabolite.id, is_metabolite=True, new_id_style=new_id_style)
-    model.metabolites._generate_index()
-
-    return model
-
-def parse_model(name, id_style='cobrapy'):
-    """Load a model, and give it a particular id style"""
-
-    # check for model
-    name = check_for_model(name)
-    if not name:
-        raise Exception('Could not find model')
-
-    # load the model pickle, or, if not, the sbml
-    try:
-        with open(join(settings.data_directory, 'models', 'model_pickles', name+'.pickle'), 'r') as f:
-            model = pickle.load(f)
-    except:
-        try:
-            model = cobra.io.load_matlab_model(join(settings.data_directory, 'models', name+'.mat'))
-        except:
-            model = cobra.io.read_sbml_model(join(settings.data_directory, 'models', name+'.xml'))
-
-        pickle_dir = join(settings.data_directory, 'models', 'model_pickles')
-
-        if not os.path.isdir(pickle_dir):
-            os.mkdir(pickle_dir)
-
-        with open(join(pickle_dir, name+'.pickle'), 'w') as f:
-            pickle.dump(model, f)
-
-    # convert the ids
-    model = convert_ids(model, id_style)
-
-    # extract metabolite formulas from names (e.g. for iAF1260)
-    model = get_formulas_from_names(model)
-
-    # turn off carbon sources
-    model = turn_off_carbon_sources(model)
-
-    return model
-
-def get_formulas_from_names(model):
-    reg = re.compile(r'.*_([A-Za-z0-9]+)$')
-    for metabolite in model.metabolites:
-        if (metabolite.formula is not None
-            and metabolite.formula.formula!=''
-            and metabolite.formula.formula is not None): continue
-        m = reg.match(metabolite.name)
-        if m:
-            metabolite.formula = Formula(m.group(1))
-    return model
-
-def turn_off_carbon_sources(model):
-    for reaction in model.reactions:
-        if 'EX_' not in str(reaction): continue
-        if carbons_for_exchange_reaction(reaction) > 0:
-            reaction.lower_bound = 0
-    return model
-
-def setup_model(model, substrate_reactions, aerobic=True, sur=10, max_our=10,
-                id_style='cobrapy', fix_iJO1366=False):
-    """Set up the model with environmntal parameters.
-
-    model: a cobra model
-    substrate_reactions: A single reaction id, list of reaction ids, or dictionary with reaction
-    ids as keys and max substrate uptakes as keys. If a list or single id is
-    given, then each substrate will be limited to /sur/
-    aerobic: True or False
-    sur: substrate uptake rate. Ignored if substrate_reactions is a dictionary.
-    max_our: Max oxygen uptake rate.
-    id_style: 'cobrapy' or 'simpheny'.
-
-    """
-    if id_style=='cobrapy': o2 = 'EX_o2_e'
-    elif id_style=='simpheny': o2 = 'EX_o2(e)'
-    else: raise Exception('Invalid id_style')
-
-    if isinstance(substrate_reactions, dict):
-        for r, v in substrate_reactions.iteritems():
-            model.reactions.get_by_id(r).lower_bound = -abs(v)
-    elif isinstance(substrate_reactions, list):
-        for r in substrate_reactions:
-            model.reactions.get_by_id(r).lower_bound = -abs(sur)
-    elif isinstance(substrate_reactions, str):
-        model.reactions.get_by_id(substrate_reactions).lower_bound = -abs(sur)
-    else: raise Exception('bad substrate_reactions argument')
-
-    if aerobic:
-        model.reactions.get_by_id(o2).lower_bound = -abs(max_our)
-    else:
-        model.reactions.get_by_id(o2).lower_bound = 0
-
-    # model specific setup
-    if str(model)=='iJO1366' and aerobic==False:
-        for r in ['CAT', 'SPODM', 'SPODMpp']:
-            model.reactions.get_by_id(r).lower_bound = 0
-            model.reactions.get_by_id(r).upper_bound = 0
-    if fix_iJO1366 and str(model)=='iJO1366':
-        for r in ['ACACT2r']:
-            model.reactions.get_by_id(r).upper_bound = 0
-        print 'made ACACT2r irreversible'
-
-    # TODO hydrogen reaction for ijo
-
-    if str(model)=='iMM904' and aerobic==False:
-        necessary_ex = ['EX_ergst(e)', 'EX_zymst(e)', 'EX_hdcea(e)',
-                        'EX_ocdca(e)', 'EX_ocdcea(e)', 'EX_ocdcya(e)']
-        for r in necessary_ex:
-            rxn = model.reactions.get_by_id(r)
-            rxn.lower_bound = -1000
-            rxn.upper_bound = 1000
-
-    return model
-
-def turn_on_subsystem(model, subsytem):
-    raise NotImplementedError()
-    for reaction in model.reactions:
-        if reaction.subsystem.strip('_') == subsytem.strip('_'):
-            reaction.lower_bound = -1000 if reaction.reversibility else 0
-            reaction.upper_bound = 1000
-    return model
-
-def carbons_for_exchange_reaction(reaction):
-    if len(reaction._metabolites) > 1:
-        raise Exception('%s not an exchange reaction' % str(reaction))
-
-    metabolite = reaction._metabolites.iterkeys().next()
-    try:
-        return metabolite.formula.elements['C']
-    except KeyError:
-        return 0
-    # match = re.match(r'C([0-9]+)', str(metabolite.formula))
-    # try:
-    #     return int(match.group(1))
-    # except AttributeError:
-    #     return 0
-
-def add_pathway(model, new_metabolites, new_reactions, subsystems, bounds,
-                check_mass_balance=False, ignore_repeats=False):
-    """Add a pathway to the model. Reversibility defaults to reversible (1).
-
-    new_metabolites: e.g. { 'ggpp_c': {'formula': 'C20H33O7P2', 'name': 'name'},
-                            'phyto_c': {'formula': 'C40H64'}},
-                            'lyco_c': {'formula': 'C40H56'},
-                            'lyco_e': {'formula': 'C40H56'} }
-    new_reactions: e.g. { 'FPS': { 'ipdp_c': -2,
-                                   'ppi_c': 1,
-                                   'grdp_c': 1 },
-                          'CRTE': { 'ipdp_c': -1,
-                                    'frdp_c': -1,
-                                    'ggpp_c': 1,
-                                    'ppi_c': 1 } }
-    subsystems: e.g. { 'FPS': 'Lycopene production',
-                       'CRTE': 'Lycopene production' }
-    bound: e.g. { 'FPS': (0, 0),
-                  'CRTE': (0, 1000) }
-
-    """
-
-    for k, v in new_metabolites.iteritems():
-        formula = Formula(v['formula']) if 'formula' in v else None
-        name = v['name'] if 'name' in v else None
-        m = cobra.Metabolite(id=k, formula=formula, name=name)
-        try:
-            model.add_metabolites([m])
-        except Exception as err:
-            if (not ignore_repeats or
-                "already in the model" not in str(err)):
-                raise(err)
-
-    for name, mets in new_reactions.iteritems():
-        r = cobra.Reaction(name=name)
-        m_obj = {}
-        for k, v in mets.iteritems():
-            m_obj[model.metabolites.get_by_id(k)] = v
-        r.add_metabolites(m_obj)
-        if bounds and (name in bounds):
-            r.lower_bound, r.upper_bound = bounds[name]
-        else:
-            r.upper_bound = 1000
-            r.lower_bound = -1000
-        if subsystems and (name in subsystems):
-            r.subsystem = subsystems[name]
-        try:
-            model.add_reaction(r)
-        except Exception as err:
-            if (not ignore_repeats or
-                "already in the model" not in str(err)):
-                raise(err)
-        if check_mass_balance and 'EX_' not in name:
-            balance = model.reactions.get_by_id(name).check_mass_balance()
-            if balance != []:
-                raise Exception('Bad balance: %s' % str(balance))
-    return model
-
-def fix_legacy_id(id, use_hyphens=False):
-    id = id.replace('_DASH_', '__')
-    id = id.replace('_FSLASH_', '/')
-    id = id.replace('_BSLASH_', "\\")
-    id = id.replace('_LPAREN_', '(')
-    id = id.replace('_LSQBKT_', '[')
-    id = id.replace('_RSQBKT_', ']')
-    id = id.replace('_RPAREN_', ')')
-    id = id.replace('_COMMA_', ',')
-    id = id.replace('_PERIOD_', '.')
-    id = id.replace('_APOS_', "'")
-    id = id.replace('&amp;', '&')
-    id = id.replace('&lt;', '<')
-    id = id.replace('&gt;', '>')
-    id = id.replace('&quot;', '"')
-    if use_hyphens:
-        id = id.replace('__', '-')
-    else:
-        id = id.replace("-", "__")
-    return id
-
-
-class IndependentObjects:
-
-    def loadGenes(self, modellist, session):
-        for model in modellist:
-            for gene in model.genes:
-                if not session.query(Gene).filter(Gene.name == gene.id).count():
-                    geneObject = Gene(locus_id = gene.id)
-                    session.add(geneObject)
-
-    def loadModel(self, model, session, genome_id, first_created):
-        modelObject = Model(bigg_id = model.id, first_created = first_created, genome_id = genome_id, notes = '')
-        session.add(modelObject)
-
-
-        """
-            if(model.id == 'iSF1195'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2014-9-16 14:26:22', genome_id = 7)
-            if(model.id == 'iSB619'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 3)
-            if(model.id == 'iJN746'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 6)
-            if(model.id == 'iIT341'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 4)
-            if(model.id == 'iNJ661'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 3)
-            if(model.id == 'iJO1366'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 15)
-            if(model.id == 'iAF692'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 5)
-            if(model.id == 'model'):
-                modelObject = Model(bigg_id = model.id, firstcreated = '2013-10-21 14:26:22', genome_id = 1)
-            if(model.id == 'iAPECO1_1312 '):
-
-            session.add(modelObject)
-        """
-
-    def loadComponents(self, modellist, session):
-        for model in modellist:
-            for component in model.metabolites:
-                metabolite = session.query(Metabolite).filter(Metabolite.name == component.id.split("_")[0])
-                #metabolite = session.query(Metabolite).filter(Metabolite.kegg_id == component.notes.get("KEGGID")[0])
-                if not metabolite.count():
-                    try: kegg_id = component.notes.get("KEGGID")[0]
-                    except: kegg_id = None
-                    try: cas_number = component.notes.get("CASNUMBER")[0]
-                    except: cas_number = None
-                    try: formula = component.notes.get("FORMULA1")[0]
-                    except: formula = None
-
-                    metaboliteObject = Metabolite(name = component.id.split("_")[0],
-                                                  long_name = component.name,
-                                                  kegg_id = kegg_id,
-                                                  cas_number = cas_number,
-                                                  formula = formula,
-                                                  flag = bool(kegg_id))
-
-                    session.add(metaboliteObject)
-                else:
-                    metaboliteObject = metabolite.first()
-                    if metaboliteObject.kegg_id == None or metaboliteObject.kegg_id == '':
-                        if 'KEGGID' in component.notes.keys():
-                            metaboliteObject.kegg_id = component.notes.get("KEGGID")[0]
-                        #metabolite.update({Metabolite.kegg_id: str(component.notes.get("KEGGID"))})
-                    if metaboliteObject.cas_number == None or metaboliteObject.cas_number == '':
-                        if 'CASNUMBER' in component.notes.keys():
-                            metaboliteObject.cas_number = component.notes.get("CASNUMBER")[0]
-                        #metabolite.update({Metabolite.cas_number: str(component.notes.get("CASNUMBER"))})
-                    if metaboliteObject.formula == None or metaboliteObject.formula == '':
-                        if 'FORMULA1' in component.notes.keys():
-                            metaboliteObject.formula = component.notes.get("FORMULA1")[0]
-                        #metabolite.update({Metabolite.formula: str(component.notes.get("FORMULA1"))})
-
-    def loadReactions(self , modellist, session):
-        for model in modellist:
-            for reaction in model.reactions:
-                if not session.query(Reaction).filter(Reaction.name == reaction.id).count():
-                    reactionObject = Reaction(name = reaction.id, long_name = reaction.name, notes = '')
-                    session.add(reactionObject)
-
-    def loadCompartments(self, modellist, session):
-        for model in modellist:
-            for component in model.metabolites:
-                if component.id is not None:
-                    if not session.query(Compartment).filter(Compartment.name == component.id[-1:len(component.id)]).count():
-                        compartmentObject = Compartment(name = component.id[-1:len(component.id)])
-                        session.add(compartmentObject)
-
-
-
-class DependentObjects:
-    def loadModelGenes(self, modellist, session):
-        for model in modellist:
-            for gene in model.genes:
-                if gene.id != 's0001':
-                    if session.query(Gene).filter(Gene.locus_id == gene.id).first() != None:
-                        genequery = session.query(Gene).filter(Gene.locus_id == gene.id).first()
-                        modelquery = session.query(Model).filter(Model.bigg_id == model.id).first()
-                        #genequery = session.query(Gene).filter(Gene.locus_id == gene.id).filter(Gene.genome_id == modelquery.genome_id).first()
-                        object = ModelGene(model_id = modelquery.id, gene_id = genequery.id)
-                        session.add(object)
-                    elif session.query(Gene).filter(Gene.name == gene.id).first() != None:
-                        genequery = session.query(Gene).filter(Gene.name == gene.id).first()
-                        modelquery = session.query(Model).filter(Model.bigg_id == model.id).first()
-                        object = ModelGene(model_id = modelquery.id, gene_id = genequery.id)
-                        session.add(object)
-                    else:
-                        #geneObject = Gene(locus_id = gene.id, leftpos=None, rightpos=None, strand=None, name=gene.id)
-                        #session.add(geneObject)
-                        synonymquery = session.query(Synonyms).filter(Synonyms.synonym == gene.id.split(".")[0]).filter(Synonyms.type == 'gene').first()
-                        if synonymquery != None:
-                            modelquery = session.query(Model).filter(Model.bigg_id == model.id).first()
-
-                            genecheck = session.query(Gene).filter(Gene.id == synonymquery.ome_id).first()
-                            if genecheck:
-                                object = ModelGene(model_id = modelquery.id, gene_id = synonymquery.ome_id)
-                                session.add(object)
-
-                                if modelquery.bigg_id == "RECON1":
-                                    genequery = session.query(Gene).filter(Gene.id == synonymquery.ome_id).first()
-                                    genequery.locus_id = gene.id
-                            else:
-                                print synonymquery.ome_id
-                        else:
-                            print gene.id, model.id
-
-
-    def loadCompartmentalizedComponent(self, modellist, session):
-        for model in modellist:
-            for metabolite in model.metabolites:
-                identifier = session.query(Compartment).filter(Compartment.name == metabolite.id[-1:len(metabolite.id)]).first()
-                m = session.query(Metabolite).filter(Metabolite.name == metabolite.id.split("_")[0]).first()
-                #m = session.query(Metabolite).filter(Metabolite.kegg_id == metabolite.notes.get("KEGGID")[0]).first()
-                object = CompartmentalizedComponent(component_id = m.id, compartment_id = identifier.id)
-                session.add(object)
-
-    def loadModelCompartmentalizedComponent(self, modellist, session):
-        for model in modellist:
-            for metabolite in model.metabolites:
-                componentquery = session.query(Metabolite).filter(Metabolite.name == metabolite.id.split("_")[0]).first()
-                #componentquery = session.query(Metabolite).filter(Metabolite.kegg_id == metabolite.notes.get("KEGGID")[0]).first()
-                compartmentquery = session.query(Compartment).filter(Compartment.name == metabolite.id[-1:len(metabolite.id)]).first()
-                compartmentalized_component_query = session.query(CompartmentalizedComponent).filter(CompartmentalizedComponent.component_id == componentquery.id).filter(CompartmentalizedComponent.compartment_id == compartmentquery.id).first()
-                modelquery = session.query(Model).filter(Model.bigg_id == model.id).first()
-                if modelquery is None:
-                    print "model query is none", model.id
-                    from IPython import embed; embed()
-
-                if compartmentalized_component_query is None:
-                    print "compartmentalized_component_query is none", metabolite.id
-                object = ModelCompartmentalizedComponent(model_id = modelquery.id, compartmentalized_component_id = compartmentalized_component_query.id, compartment_id = compartmentquery.id)
-                session.add(object)
-
-
-    def loadModelReaction(self, modellist, session):
-        for model in modellist:
-            for reaction in model.reactions:
-                reactionquery = session.query(Reaction).filter(Reaction.name == reaction.id).first()
-                modelquery = session.query(Model).filter(Model.bigg_id == model.id).first()
-                object = ModelReaction(reaction_id = reactionquery.id, model_id = modelquery.id, name = reaction.id, upperbound = reaction.upper_bound, lowerbound = reaction.lower_bound, gpr = reaction.gene_reaction_rule)
-                session.add(object)
-
-
-    def loadGPRMatrix(self, modellist, session):
-        for model in modellist:
-            for reaction in model.reactions:
-                for gene in reaction._genes:
-                    if gene.id != 's0001':
-
-                        model_query = session.query(Model).filter(Model.bigg_id == model.id).first()
-                        model_gene_query = session.query(ModelGene).join(Gene).filter(Gene.locus_id == gene.id).filter(ModelGene.model_id == model_query.id).first()
-
-                        if model_gene_query != None:
-                            model_reaction_query = session.query(ModelReaction).filter(ModelReaction.name == reaction.id).filter(ModelReaction.model_id == model_query.id).first()
-                            object = GPRMatrix(model_gene_id = model_gene_query.id, model_reaction_id = model_reaction_query.id)
-                            session.add(object)
-                        else:
-                            model_gene_query = session.query(ModelGene).join(Gene).filter(Gene.name == gene.id).filter(ModelGene.model_id == model_query.id).first()
-                            if model_gene_query != None:
-                                model_reaction_query = session.query(ModelReaction).filter(ModelReaction.name == reaction.id).filter(ModelReaction.model_id == model_query.id).first()
-                                object = GPRMatrix(model_gene_id = model_gene_query.id, model_reaction_id = model_reaction_query.id)
-                                session.add(object)
-                            else:
-                                synonymquery = session.query(Synonyms).filter(Synonyms.synonym == gene.id.split(".")[0]).first()
-                                if synonymquery != None:
-                                    if synonymquery.ome_id != None:
-                                        model_gene_query = session.query(ModelGene).join(Gene).filter(Gene.id == synonymquery.ome_id).filter(ModelGene.model_id == model_query.id).first()
-                                        model_reaction_query = session.query(ModelReaction).filter(ModelReaction.name == reaction.id).filter(ModelReaction.model_id == model_query.id).first()
-                                        object = GPRMatrix(model_gene_id = model_gene_query.id, model_reaction_id = model_reaction_query.id)
-                                        session.add(object)
-                                    else:
-                                        print "ome id is null " + synonymquery.ome_id
-                                else:
-                                    print "mistake", gene.id, reaction.id
-
-    def loadReactionMatrix(self, modellist, session):
-        for model in modellist:
-            for reaction in model.reactions:
-                reactionquery = session.query(Reaction).filter(Reaction.name == reaction.id).first()
-                for metabolite in reaction._metabolites:
-
-                    componentquery = session.query(Metabolite).filter(Metabolite.name == metabolite.id.split("_")[0]).first()
-                    #componentquery = session.query(Metabolite).filter(Metabolite.kegg_id == metabolite.notes.get("KEGGID")[0]).first()
-                    compartmentquery = session.query(Compartment).filter(Compartment.name == metabolite.id[-1:len(metabolite.id)]).first()
-                    compartmentalized_component_query = session.query(CompartmentalizedComponent).filter(CompartmentalizedComponent.component_id == componentquery.id).filter(CompartmentalizedComponent.compartment_id == compartmentquery.id).first()
-                    if not session.query(ReactionMatrix).filter(ReactionMatrix.reaction_id == reactionquery.id).filter(ReactionMatrix.compartmentalized_component_id == compartmentalized_component_query.id).count():
-                        for stoichKey in reaction._metabolites.keys():
-                            if str(stoichKey) == metabolite.id:
-                                stoichiometryobject = reaction._metabolites[stoichKey]
-                        object = ReactionMatrix(reaction_id = reactionquery.id, compartmentalized_component_id = compartmentalized_component_query.id, stoichiometry = stoichiometryobject)
-                        session.add(object)
-
-    def loadEscher(self, session):
-        m = models.parse_model('iJO1366')
-        for reaction in m.reactions:
-            escher = Escher_Map(bigg_id = reaction.id, category = "reaction", model_name = m.id)
-            session.add(escher)
-
-
-
 
 @timing
-def load_model(model_id, genome_id, model_creation_timestamp):
-    with create_Session() as session:
+def load_model(model_filepath, pub_ref, genome_ref, session):
+    """Load a model into the database. Returns the bigg_id for the new model.
 
-        try: genome = session.query(base.Genome).filter_by(bioproject_id=genome_id).one()
-        except:
-            print 'Genbank file %s for model %s was not uploaded' % (genome_id, model_id)
-            return
+    Arguments
+    ---------
 
-        model = parse_model(model_id)
+    model_filepath: the path to the file where model is stored.
 
-        IndependentObjects().loadModel(model, session, genome.id, model_creation_timestamp)
-        IndependentObjects().loadComponents([model], session)
-        IndependentObjects().loadCompartments([model], session)
-        DependentObjects().loadCompartmentalizedComponent([model], session)
-        IndependentObjects().loadReactions([model], session)
-        DependentObjects().loadModelGenes([model], session)
-        DependentObjects().loadModelCompartmentalizedComponent([model], session)
-        DependentObjects().loadModelReaction([model], session)
-        DependentObjects().loadGPRMatrix([model], session)
-        DependentObjects().loadReactionMatrix([model], session)
-        #DependentObjects().loadEscher(session)
+    pub_ref: a publication PMID or doi for the model, as a tuple like this:
+
+        ('doi', '10.1128/ecosalplus.10.2.1')
+
+        ('pmid', '21988831')
+
+    genome_ref: A tuple specifying the genome accession type and value.
+
+    session: An instance of base.Session.
+
+    """
+    # apply id normalization
+    logging.debug('Parsing SBML')
+    model, old_parsed_ids = parse.load_and_normalize(model_filepath)
+    model_bigg_id = model.id
+
+    # check that the model doesn't already exist
+    if session.query(Model).filter_by(bigg_id=model_bigg_id).count() > 0:
+        raise AlreadyLoadedError('Model %s already loaded' % model_bigg_id)
+
+    # check for a genome annotation for this model
+    if genome_ref is not None:
+        genome_db = (session
+                     .query(Genome)
+                     .filter(Genome.accession_type==genome_ref[0])
+                     .filter(Genome.accession_value==genome_ref[1])
+                     .first())
+        if genome_db is None:
+            raise GenbankNotFound('Genome for model {} not found with genome_ref {}'
+                                  .format(model_bigg_id, genome_ref))
+        genome_id = genome_db.id
+    else:
+        logging.info('No Genome reference provided for model {}'.format(model_bigg_id))
+        genome_id = None
+
+    # Load the model objects. Remember: ORDER MATTERS! So don't mess around.
+    logging.debug('Loading objects for model {}'.format(model.id))
+    published_filename = os.path.basename(model_filepath)
+    model_database_id = load_new_model(session, model, genome_id, pub_ref,
+                                       published_filename)
+
+    # metabolites/components and linkouts
+    # get compartment names
+    if os.path.exists(settings.compartment_names):
+        with open(settings.compartment_names, 'r') as f:
+            compartment_names = {}
+            for line in f.readlines():
+                sp = [x.strip() for x in line.split('\t')]
+                try:
+                    compartment_names[sp[0]] = sp[1]
+                except IndexError:
+                    continue
+    else:
+        logging.warn('No compartment names file')
+        compartment_names = {}
+    load_metabolites(session, model_database_id, model, compartment_names,
+                     old_parsed_ids['metabolites'])
+
+    # reactions
+    model_db_rxn_ids = load_reactions(session, model_database_id, model,
+                                      old_parsed_ids['reactions'])
+
+    # genes
+    load_genes(session, model_database_id, model, model_db_rxn_ids,
+               old_parsed_ids['genes'])
+
+    # count model objects for the model summary web page
+    load_model_count(session, model_database_id)
+
+    session.commit()
+
+    return model_bigg_id
 
 
+def load_new_model(session, model, genome_db_id, pub_ref, published_filename):
+    """Load the model.
 
+    Arguments:
+    ---------
+
+    session: A SQLAlchemy session.
+
+    model: A COBRApy model.
+
+    genome_db_id: The database ID of the genome. Can be None.
+
+    pub_ref: a publication PMID or doi for the model, as a string like this:
+
+        doi:10.1128/ecosalplus.10.2.1
+
+        pmid:21988831
+
+        Can be None
+
+    Returns:
+    -------
+
+    The database ID of the new model row.
+
+    """
+    model_db = Model(bigg_id=model.id, genome_id=genome_db_id,
+                     published_filename=published_filename)
+    session.add(model_db)
+    if pub_ref is not None:
+        ref_type, ref_id = pub_ref
+        publication_db = (session
+                            .query(Publication)
+                            .filter(Publication.reference_type==ref_type)
+                            .filter(Publication.reference_id==ref_id)
+                            .first())
+        if publication_db is None:
+            publication_db = Publication(reference_type=ref_type,
+                                                reference_id=ref_id)
+            session.add(publication_db)
+            session.commit()
+        publication_model_db = (session
+                                .query(PublicationModel)
+                                .filter(PublicationModel.publication_id == publication_db.id)
+                                .filter(PublicationModel.model_id == model_db.id)
+                                .first())
+        if publication_model_db is None:
+            publication_model_db = PublicationModel(model_id=model_db.id,
+                                                            publication_id=publication_db.id)
+            session.add(publication_model_db)
+    session.commit()
+    return model_db.id
+
+
+def _load_metabolite_linkouts(session, cobra_metabolite, metabolite_database_id):
+    """Load new linkouts even ones that are pointing to previously created universal
+    metabolites.
+
+    The only scenario where we don't load a linkout is if the external id and
+    metabolite is exactly the same as a previous linkout.
+
+    """
+
+    # parse the notes
+    def parse_linkout_str(id):
+        if id is None:
+            return None
+        id_string = str(id)
+        for s in ['{', '}', '[', ']', '&apos;', "'",]:
+            id_string = id_string.replace(s, '')
+        return id_string.strip()
+
+    data_source_fix = {'KEGG_ID' : 'KEGGID', 'CHEBI_ID': 'CHEBI'}
+
+    for external_source, v in cobra_metabolite.notes.iteritems():
+        # ignore formulas
+        if external_source.lower() in ['formula', 'formula1', 'none', 'charge']:
+            continue
+
+        # check if linkout matches the list
+        external_source = external_source.upper()
+        v = v[0]
+        if external_source in data_source_fix:
+            external_source = data_source_syn[external_source]
+        if '&apos' in v:
+            ids = [parse_linkout_str(x) for x in v.split(',')]
+        else:
+            ids = [parse_linkout_str(v)]
+
+        for external_id in ids:
+            if external_id.lower() in ['na', 'none']:
+                continue
+            data_source_id = get_or_create_data_source(session, external_source)
+            synonym_db = (session
+                          .query(Synonym)
+                          .filter(Synonym.synonym == external_id)
+                          .filter(Synonym.type == 'component')
+                          .filter(Synonym.ome_id == metabolite_database_id)
+                          .filter(Synonym.data_source_id == data_source_id)
+                          .first())
+            if synonym_db is None:
+                synonym_db = Synonym(synonym=external_id,
+                                     type = 'component',
+                                     ome_id = metabolite_database_id,
+                                     data_source_id=data_source_id)
+                session.add(synonym_db)
+                session.commit()
+
+
+def load_metabolites(session, model_id, model, compartment_names,
+                     old_metabolite_ids):
+    """Load the metabolites as components and model components.
+
+    Arguments:
+    ---------
+
+    session: An SQLAlchemy session.
+
+    model_id: The database ID for the model.
+
+    model: The COBRApy model.
+
+    old_metabolite_ids: A dictionary where keys are new IDs and values are old
+    IDs for compartmentalized metabolites.
+
+    """
+
+    # only grab this once
+    data_source_id = get_or_create_data_source(session, 'old_id')
+
+    # for each metabolite in the model
+    for metabolite in model.metabolites:
+        try:
+            component_bigg_id, compartment_bigg_id = parse.split_compartment(metabolite.id)
+        except Exception:
+            logging.error(('Could not find compartment for metabolite %s in'
+                            'model %s' % (metabolite.id, model.id)))
+            continue
+
+        # If there is no metabolite, add a new one.
+        # TODO we could also double check these ID matches with linkouts and formula
+        metabolite_db = (session
+                         .query(Metabolite)
+                         .filter(Metabolite.bigg_id == component_bigg_id)
+                         .first())
+
+        # Look for the formula in these places
+        formula_fns = [lambda m: getattr(m, 'formula', None), # support cobra v0.3 and 0.4
+                       lambda m: m.notes.get('FORMULA', None),
+                       lambda m: m.notes.get('FORMULA1', None)]
+        # Cast to string, but not for None
+        strip_str_or_none = lambda v: str(v).strip() if v is not None else None
+        # Ignore the empty string
+        ignore_empty_str = lambda s: s if s != '' else None
+        # Use a generator for lazy evaluation
+        values = (ignore_empty_str(strip_str_or_none(formula_fn(metabolite)))
+                  for formula_fn in formula_fns)
+        # Get the first non-null result. Otherwise _formula = None.
+        _formula = format_formula(next(ifilter(None, values), None))
+
+        # get charge
+        try:
+            charge = int(metabolite.charge)
+        except Exception:
+            if hasattr(metabolite, 'charge') and metabolite.charge is not None:
+                logging.debug('Could not convert charge to integer for metabolite {} in model {}: {}'
+                              .format(metabolite.id, model.id, metabolite.charge))
+            charge = None
+
+        # if necessary, add the new metabolite, and keep track of the ID
+        if metabolite_db is None:
+            # make the new metabolite
+            metabolite_db = Metabolite(bigg_id=component_bigg_id,
+                                       name=scrub_name(getattr(metabolite, 'name', None)))
+            session.add(metabolite_db)
+            session.commit()
+
+        # load the linkouts for the universal metabolite
+        _load_metabolite_linkouts(session, metabolite, metabolite_db.id)
+
+        # if there is no compartment, add a new one
+        compartment_db = (session
+                          .query(Compartment)
+                          .filter(Compartment.bigg_id == compartment_bigg_id)
+                          .first())
+        if compartment_db is None:
+            try:
+                name = compartment_names[compartment_bigg_id]
+            except KeyError:
+                logging.warn('No name found for compartment %s' % compartment_bigg_id)
+                name = ''
+            compartment_db = Compartment(bigg_id=compartment_bigg_id, name=name)
+            session.add(compartment_db)
+            session.commit()
+
+        # if there is no compartmentalized compartment, add a new one
+        comp_component_db = (session
+                             .query(CompartmentalizedComponent)
+                             .filter(CompartmentalizedComponent.component_id == metabolite_db.id)
+                             .filter(CompartmentalizedComponent.compartment_id == compartment_db.id)
+                             .first())
+        if comp_component_db is None:
+            comp_component_db = CompartmentalizedComponent(component_id=metabolite_db.id,
+                                                           compartment_id=compartment_db.id)
+            session.add(comp_component_db)
+            session.commit()
+
+        # if there is no model compartmentalized compartment, add a new one
+        model_comp_comp_db = (session
+                              .query(ModelCompartmentalizedComponent)
+                              .filter(ModelCompartmentalizedComponent.compartmentalized_component_id == comp_component_db.id)
+                              .filter(ModelCompartmentalizedComponent.model_id == model_id)
+                              .first())
+        if model_comp_comp_db is None:
+            model_comp_comp_db = ModelCompartmentalizedComponent(model_id=model_id,
+                                                                 compartmentalized_component_id=comp_component_db.id,
+                                                                 formula=_formula,
+                                                                 charge=charge)
+            session.add(model_comp_comp_db)
+            session.commit()
+        else:
+            if model_comp_comp_db.formula is None:
+                model_comp_comp_db.formula = _formula
+            if model_comp_comp_db.charge is None:
+                model_comp_comp_db.charge = charge
+            session.commit()
+
+        # add synonyms
+        for old_bigg_id_c in old_metabolite_ids[metabolite.id]:
+            synonym_db = (session
+                          .query(Synonym)
+                          .filter(Synonym.type == 'compartmentalized_component')
+                          .filter(Synonym.ome_id == comp_component_db.id)
+                          .filter(Synonym.synonym == old_bigg_id_c)
+                          .filter(Synonym.data_source_id == data_source_id)
+                          .first())
+            if synonym_db is None:
+                synonym_db = Synonym(type='compartmentalized_component',
+                                     ome_id=comp_component_db.id,
+                                     synonym=old_bigg_id_c,
+                                     data_source_id=data_source_id)
+                session.add(synonym_db)
+                session.commit()
+
+            # add OldIDSynonym
+            old_id_db = (session
+                         .query(OldIDSynonym)
+                         .filter(OldIDSynonym.type == 'model_compartmentalized_component')
+                         .filter(OldIDSynonym.ome_id == model_comp_comp_db.id)
+                         .filter(OldIDSynonym.synonym_id == synonym_db.id)
+                         .first())
+            if old_id_db is None:
+                old_id_db = OldIDSynonym(type='model_compartmentalized_component',
+                                         ome_id=model_comp_comp_db.id,
+                                         synonym_id=synonym_db.id)
+                session.add(old_id_db)
+                session.commit()
+
+
+def _new_reaction(session, reaction, bigg_id, reaction_hash, model_db_id, model,
+                  is_pseudoreaction):
+    """Add a new universal reaction with reaction matrix rows."""
+
+    # name is optional in cobra 0.4b2. This will probably change back.
+    name = check_none(getattr(reaction, 'name', None))
+    reaction_db = Reaction(bigg_id=bigg_id, name=scrub_name(name),
+                           reaction_hash=reaction_hash,
+                           pseudoreaction=is_pseudoreaction)
+    session.add(reaction_db)
+    session.commit
+
+    # for each reactant, add to the reaction matrix
+    for metabolite, stoich in reaction.metabolites.iteritems():
+        try:
+            component_bigg_id, compartment_bigg_id = parse.split_compartment(metabolite.id)
+        except NotFoundError:
+            logging.error('Could not split metabolite %s in model %s' % (metabolite.id, model.id))
+            continue
+
+        # get the component in the model
+        comp_comp_db = (session
+                        .query(CompartmentalizedComponent)
+                        .join(Component,
+                              Component.id == CompartmentalizedComponent.component_id)
+                        .join(Compartment,
+                              Compartment.id == CompartmentalizedComponent.compartment_id)
+                        .join(ModelCompartmentalizedComponent,
+                              ModelCompartmentalizedComponent.compartmentalized_component_id == CompartmentalizedComponent.id)
+                        .filter(Component.bigg_id == component_bigg_id)
+                        .filter(Compartment.bigg_id == compartment_bigg_id)
+                        .filter(ModelCompartmentalizedComponent.model_id == model_db_id)
+                        .first())
+        if comp_comp_db is None:
+            logging.error('Could not find metabolite {!s} for model {!s} in the database'
+                        .format(metabolite.id, model.id))
+            continue
+
+        # check if the reaction matrix row already exists
+        found_reaction_matrix = (session
+                                .query(ReactionMatrix)
+                                .filter(ReactionMatrix.reaction_id == reaction_db.id)
+                                .filter(ReactionMatrix.compartmentalized_component_id == comp_comp_db.id)
+                                .count() > 0)
+        if not found_reaction_matrix:
+            new_object = ReactionMatrix(reaction_id=reaction_db.id,
+                                        compartmentalized_component_id=comp_comp_db.id,
+                                        stoichiometry=stoich)
+            session.add(new_object)
+        else:
+            logging.debug('ReactionMatrix row already present for model {!s} metabolite {!s} reaction {!s}'
+                        .format(model.id, metabolite.id, reaction.id))
+
+    return reaction_db
+
+def load_reactions(session, model_db_id, model, old_reaction_ids):
+    """Load the reactions and stoichiometries into the model.
+
+    TODO if the reaction is already loaded, we need to check the stoichometry
+    has. If that doesn't match, then add a new reaction with an incremented ID
+    (e.g. ACALD_1)
+
+    Arguments
+    ---------
+
+    session: An SQLAlchemy session.
+
+    model_db_id: The database ID for the model.
+
+    model: The COBRApy model.
+
+    old_reaction_ids: A dictionary where keys are new IDs and values are old IDs
+    for reactions.
+
+    Returns
+    -------
+
+    A dictionary with keys for reaction BiGG IDs in the model and values for the
+    associated ModelReaction.id in the database.
+
+    """
+
+    # only grab this once
+    data_source_id = get_or_create_data_source(session, 'old_id')
+
+    # get reaction id_prefs
+    id_prefs = load_tsv(settings.reaction_id_prefs)
+    def _check_id_prefs(an_id, versus_id):
+        """Return True if an_id is preferred over versus_id."""
+        for row in id_prefs:
+            try:
+                idx1 = row.index(an_id)
+                idx2 = row.index(versus_id)
+            except ValueError:
+                continue
+
+            return idx1 < idx2
+        return False
+
+    # get reaction hash_prefs
+    hash_prefs = load_tsv(settings.reaction_hash_prefs)
+    def _check_hash_prefs(a_hash):
+        """Return the preferred BiGG ID for a_hash, or None."""
+        for row in hash_prefs:
+            if row[0] == a_hash:
+                return row[1]
+        return None
+
+    model_db_rxn_ids = {}
+    for reaction in model.reactions:
+        # get the reaction
+        reaction_db = (session
+                       .query(Reaction)
+                       .filter(Reaction.bigg_id == reaction.id)
+                       .first())
+
+        # check for pseudoreaction
+        is_pseudoreaction = check_pseudoreaction(reaction.id)
+
+        # calculate the hash
+        reaction_hash = parse.hash_reaction(reaction)
+        hash_db = (session
+                   .query(Reaction)
+                   .filter(Reaction.reaction_hash == reaction_hash)
+                   .filter(Reaction.pseudoreaction == is_pseudoreaction)
+                   .first())
+
+        # bigg_id match  hash match b==h  pseudoreaction  example                   function
+        #  n               n               n            first GAPD                _new_reaction (1)
+        #  n               n               y            first EX_glc_e            _new_reaction (1)
+        #  y               n               n            incorrect GAPD            _new_reaction & increment (2)
+        #  y               n               y            incorrect EX_glc_e        _new_reaction & increment (2)
+        #  n               y               n            GAPDH after GAPD          reaction = hash_reaction (3a)
+        #  n               y               y            EX_glc__e after EX_glc_e  reaction = hash_reaction (3a)
+        #  y               y         n     n            ?                         reaction = hash_reaction (3a)
+        #  y               y         n     y            ?                         reaction = hash_reaction (3a)
+        #  y               y         y     n            second GAPD               reaction = bigg_reaction (3b)
+        #  y               y         y     y            second EX_glc_e           reaction = bigg_reaction (3b)
+        # NOTE: only check pseudoreaction hash against other pseudoreactions
+
+        def _find_new_incremented_id(session, original_id):
+            """Look for a reaction bigg_id that is not already taken."""
+            new_id = increment_id(original_id)
+            while True:
+                if session.query(Reaction).filter(Reaction.bigg_id == new_id).first() is None:
+                    return new_id
+                new_id = increment_id(new_id)
+
+        preferred_id = _check_hash_prefs(reaction_hash)
+        # (0) If there is a preferred ID, make that the new ID, and increment any old IDs
+        if preferred_id is not None:
+            # if the reaction already matches, just continue
+            if hash_db is not None and hash_db.bigg_id == preferred_id:
+                reaction_db = hash_db
+            # otherwise, make the new reaction
+            else:
+                # if existing reactions match the preferred reaction find a new,
+                # incremented id for the existing match
+                preferred_id_db = session.query(Reaction).filter(Reaction.bigg_id == preferred_id).first()
+                if preferred_id_db is not None:
+                    new_id = _find_new_incremented_id(session, preferred_id)
+                    logging.warn('Incrementing database reaction {} to {} and prefering {} (from model {}) based on hash preferences'
+                                .format(preferred_id, new_id, preferred_id, model.id))
+                    preferred_id_db.bigg_id = new_id
+                    session.commit()
+
+                # make a new reaction for the preferred_id
+                reaction_db = _new_reaction(session, reaction, preferred_id,
+                                            reaction_hash, model_db_id, model,
+                                            is_pseudoreaction)
+
+        # (1) no bigg_id matches, no stoichiometry match or pseudoreaction, then
+        # make a new reaction
+        elif reaction_db is None and hash_db is None:
+            reaction_db = _new_reaction(session, reaction, reaction.id,
+                                        reaction_hash, model_db_id, model,
+                                        is_pseudoreaction)
+
+        # (2) bigg_id matches, but not the hash, then increment the BIGG_ID
+        elif reaction_db is not None and hash_db is None:
+            # loop until we find a non-matching find non-matching ID
+            new_id = _find_new_incremented_id(session, reaction.id)
+            logging.warn('Incrementing bigg_id {} to {} (from model {}) based on conflicting reaction hash'
+                        .format(reaction.id, new_id, model.id))
+            reaction_db = _new_reaction(session, reaction, new_id,
+                                        reaction_hash, model_db_id, model,
+                                        is_pseudoreaction)
+
+        # (3) but found a stoichiometry match, then use the hash reaction match.
+        elif hash_db is not None:
+            # WARNING TODO this requires that loaded metabolites always match on
+            # bigg_id, which should be the case.
+
+            # (3a)
+            if reaction_db is None or reaction_db.id != hash_db.id:
+                is_preferred = _check_id_prefs(reaction.id, hash_db.bigg_id)
+                if is_preferred:
+                    logging.warn('Switching database reaction {} to bigg_id {} based on reaction hash and id_prefs file'
+                                .format(hash_db.bigg_id, reaction.id, model.id))
+                    hash_db.bigg_id = reaction.id
+                    session.commit()
+                reaction_db = hash_db
+            # (3b) BIGG ID matches a reaction with the same hash, then just continue
+            else:
+                pass
+
+        else:
+            raise Exception('Should not get here')
+
+        # subsystem
+        subsystem = check_none(reaction.subsystem.strip())
+
+        # get the model reaction
+        model_reaction_db = (session
+                             .query(ModelReaction)
+                             .filter(ModelReaction.reaction_id == reaction_db.id)
+                             .filter(ModelReaction.model_id == model_db_id)
+                             .filter(ModelReaction.lower_bound == reaction.lower_bound)
+                             .filter(ModelReaction.upper_bound == reaction.upper_bound)
+                             .filter(ModelReaction.gene_reaction_rule == reaction.gene_reaction_rule)
+                             .filter(ModelReaction.objective_coefficient == reaction.objective_coefficient)
+                             .filter(ModelReaction.subsystem == subsystem)
+                             .first())
+        if model_reaction_db is None:
+            # get the number of existing copies of this reaction in the model
+            copy_number = (session
+                           .query(ModelReaction)
+                           .filter(ModelReaction.reaction_id == reaction_db.id)
+                           .filter(ModelReaction.model_id == model_db_id)
+                           .count()) + 1
+            # make a new reaction
+            model_reaction_db = ModelReaction(model_id=model_db_id,
+                                              reaction_id=reaction_db.id,
+                                              gene_reaction_rule=reaction.gene_reaction_rule,
+                                              original_gene_reaction_rule=reaction.gene_reaction_rule,
+                                              upper_bound=reaction.upper_bound,
+                                              lower_bound=reaction.lower_bound,
+                                              objective_coefficient=reaction.objective_coefficient,
+                                              copy_number=copy_number,
+                                              subsystem=subsystem)
+            session.add(model_reaction_db)
+            session.commit()
+
+        # remember the changed ids
+        model_db_rxn_ids[reaction.id] = model_reaction_db.id
+
+        # add synonyms
+        #
+        # get the id from the published model
+        for old_bigg_id in old_reaction_ids[reaction.id]:
+            # add a synonym
+            synonym_db = (session
+                          .query(Synonym)
+                          .filter(Synonym.type == 'reaction')
+                          .filter(Synonym.ome_id == reaction_db.id)
+                          .filter(Synonym.synonym == old_bigg_id)
+                          .filter(Synonym.data_source_id == data_source_id)
+                          .first())
+            if synonym_db is None:
+                synonym_db = Synonym(type='reaction',
+                                     ome_id=reaction_db.id,
+                                     synonym=old_bigg_id,
+                                     data_source_id=data_source_id)
+                session.add(synonym_db)
+                session.commit()
+
+            # add OldIDSynonym
+            old_id_db = (session
+                         .query(OldIDSynonym)
+                         .filter(OldIDSynonym.type == 'model_reaction')
+                         .filter(OldIDSynonym.ome_id == model_reaction_db.id)
+                         .filter(OldIDSynonym.synonym_id == synonym_db.id)
+                         .first())
+            if old_id_db is None:
+                old_id_db = OldIDSynonym(type='model_reaction',
+                                         ome_id=model_reaction_db.id,
+                                         synonym_id=synonym_db.id)
+                session.add(old_id_db)
+                session.commit()
+
+    return model_db_rxn_ids
+
+
+# find gene functions
+def _match_gene_by_fns(fn_list, session, gene_id, chromosome_ids):
+    """Go through each funciton and look for a match.
+
+    """
+    for fn in fn_list:
+        match, is_alternative_transcript = fn(session, gene_id, chromosome_ids)
+        if len(match) > 0:
+            if len(match) > 1:
+                logging.warn('Multiple matches for gene {} with function {}. Using the first match.'
+                            .format(gene_id, fn.__name__))
+            return match[0], is_alternative_transcript
+    return None, False
+
+
+def _by_bigg_id(session, gene_id, chromosome_ids):
+    # look for a matching model gene
+    gene_db = (session
+               .query(Gene)
+               .filter(func.lower(Gene.bigg_id) == func.lower(gene_id))
+               .filter(Gene.chromosome_id.in_(chromosome_ids))
+               .all())
+    return gene_db, False
+
+
+def _by_name(session, gene_id, chromosome_ids):
+    gene_db = (session
+               .query(Gene)
+               .filter(func.lower(Gene.name) == func.lower(gene_id))
+               .filter(Gene.chromosome_id.in_(chromosome_ids))
+               .all())
+    return gene_db, False
+
+
+def _by_synonym(session, gene_id, chromosome_ids):
+    gene_db = (session
+               .query(Gene)
+               .join(Synonym, Synonym.ome_id == Gene.id)
+               .filter(Gene.chromosome_id.in_(chromosome_ids))
+               .filter(func.lower(Synonym.synonym) == func.lower(gene_id))
+               .all())
+    return gene_db, False
+
+
+def _by_alternative_transcript(session, gene_id, chromosome_ids):
+    """Function to check for the alternative transcript match."""
+    check = re.match(r'(.*)_AT[0-9]{1,2}$', gene_id)
+    if not check:
+        gene_db = []
+    else:
+        # find the old gene
+        gene_db = (session
+                   .query(Gene)
+                   .filter(Gene.chromosome_id.in_(chromosome_ids))
+                   .filter(func.lower(Gene.bigg_id) == func.lower(check.group(1)))
+                   .filter(Gene.alternative_transcript_of.is_(None))
+                   .all())
+    return gene_db, True
+
+
+def _by_alternative_transcript_name(session, gene_id, chromosome_ids):
+    """Function to check for the alternative transcript match."""
+    check = re.match(r'(.*)_AT[0-9]{1,2}$', gene_id)
+    if not check:
+        gene_db = []
+    else:
+        # find the old gene
+        gene_db = (session
+                   .query(Gene)
+                   .filter(Gene.chromosome_id.in_(chromosome_ids))
+                   .filter(func.lower(Gene.name) == func.lower(check.group(1)))
+                   .filter(Gene.alternative_transcript_of.is_(None))
+                   .all())
+    return gene_db, True
+
+
+def _by_alternative_transcript_synonym(session, gene_id, chromosome_ids):
+    """Function to check for the alternative transcript match."""
+    check = re.match(r'(.*)_AT[0-9]{1,2}$', gene_id)
+    if not check:
+        gene_db = []
+    else:
+        # find the old gene
+        gene_db = (session
+                   .query(Gene)
+                   .join(Synonym, Synonym.ome_id == Gene.id)
+                   .filter(Gene.chromosome_id.in_(chromosome_ids))
+                   .filter(func.lower(Synonym.synonym) == func.lower(check.group(1)))
+                   .filter(Gene.alternative_transcript_of.is_(None))
+                   .all())
+    return gene_db, True
+
+
+def _by_bigg_id_no_underscore(session, gene_id, chromosome_ids):
+    """Matches for T maritima genes"""
+    # look for a matching model gene
+    gene_db = (session
+               .query(Gene)
+               .filter(func.lower(Gene.bigg_id) == func.lower(gene_id.replace('_', '')))
+               .filter(Gene.chromosome_id.in_(chromosome_ids))
+               .all())
+    return gene_db, False
+
+
+def _replace_gene_str(rule, old_gene, new_gene):
+    return re.sub(r'\b'+old_gene+r'\b', new_gene, rule)
+
+
+def load_genes(session, model_db_id, model, model_db_rxn_ids, old_gene_ids):
+    """Load the genes for this model.
+
+    Arguments:
+    ---------
+
+    session: An SQLAlchemy session.
+
+    model_db_id: The database ID for the model.
+
+    model: The COBRApy model.
+
+    model_db_rxn_ids: A dictionary with keys for reactions in the model and
+    values for the associated ModelReaction.id in the database.
+
+    old_gene_ids: A dictionary where keys are new IDs and values are old IDs for
+    genes.
+
+    """
+    # only grab this once
+    data_source_id = get_or_create_data_source(session, 'old_id')
+
+    # find the model in the db
+    model_db = session.query(Model).get(model_db_id)
+
+    # find the chromosomes in the db
+    chromosome_ids = (session
+                       .query(Chromosome.id)
+                       .filter(Chromosome.genome_id == model_db.genome_id)
+                       .all())
+    if len(chromosome_ids) == 0:
+        logging.warn('No chromosomes for model %s' % model_db.bigg_id)
+
+    # keep track of the gene-reaction associations
+    gene_bigg_id_to_model_reaction_db_ids = defaultdict(set)
+    for reaction in model.reactions:
+        # find the ModelReaction that corresponds to this particular reaction in
+        # the model
+        model_reaction_db = (session
+                             .query(ModelReaction)
+                             .get(model_db_rxn_ids[reaction.id]))
+        if model_reaction_db is None:
+            logging.error('Could not find ModelReaction {} for {} in model {}. Cannot load GeneReactionMatrix entries'
+                          .format(model_db_rxn_ids[reaction.id], reaction.id, model.id))
+            continue
+        for gene in reaction.genes:
+            gene_bigg_id_to_model_reaction_db_ids[gene.id].add(model_reaction_db.id)
+
+    # load the genes
+    for gene in model.genes:
+        if len(chromosome_ids) == 0:
+            gene_db = None; is_alternative_transcript = False
+        else:
+            # find a matching gene
+            fns = [_by_bigg_id, _by_name, _by_synonym, _by_alternative_transcript,
+                   _by_alternative_transcript_name, _by_alternative_transcript_synonym,
+                   _by_bigg_id_no_underscore]
+            gene_db, is_alternative_transcript = _match_gene_by_fns(fns, session,
+                                                                    gene.id,
+                                                                    chromosome_ids)
+
+        if not gene_db:
+            # add
+            if len(chromosome_ids) > 0:
+                logging.warn('Gene not in genbank file: {} from model {}'
+                            .format(gene.id, model.id))
+            gene_db = Gene(bigg_id=gene.id,
+                           # name is optional in cobra 0.4b2. This will probably change back.
+                           name=scrub_name(getattr(gene, 'name', None)),
+                           mapped_to_genbank=False)
+            session.add(gene_db)
+            session.commit()
+
+        elif is_alternative_transcript:
+            # duplicate gene for the alternative transcript
+            old_gene_db = gene_db
+            ome_gene = {}
+            ome_gene['bigg_id'] = gene.id
+            ome_gene['name'] = old_gene_db.name
+            ome_gene['leftpos'] = old_gene_db.leftpos
+            ome_gene['rightpos'] = old_gene_db.rightpos
+            ome_gene['chromosome_id'] = old_gene_db.chromosome_id
+            ome_gene['strand'] = old_gene_db.strand
+            ome_gene['mapped_to_genbank'] = True
+            ome_gene['alternative_transcript_of'] = old_gene_db.id
+            gene_db = Gene(**ome_gene)
+            session.add(gene_db)
+            session.commit()
+
+            # duplicate all the synonyms
+            synonyms_db = (session
+                           .query(Synonym)
+                           .filter(Synonym.ome_id == old_gene_db.id)
+                           .all())
+            for syn_db in synonyms_db:
+                # add a new synonym
+                ome_synonym = {}
+                ome_synonym['type'] = syn_db.type
+                ome_synonym['ome_id'] = gene_db.id
+                ome_synonym['synonym'] = syn_db.synonym
+                ome_synonym['data_source_id'] = syn_db.data_source_id
+                synonym_object = Synonym(**ome_synonym)
+                session.add(synonym_object)
+
+        # add model gene
+        model_gene_db = (session
+                         .query(ModelGene)
+                         .filter(ModelGene.gene_id == gene_db.id)
+                         .filter(ModelGene.model_id == model_db_id)
+                         .first())
+        if model_gene_db is None:
+            model_gene_db = ModelGene(gene_id=gene_db.id,
+                                      model_id=model_db_id)
+            session.add(model_gene_db)
+            session.commit()
+
+        # add old gene synonym
+        for old_bigg_id in old_gene_ids[gene.id]:
+            synonym_db = (session
+                          .query(Synonym)
+                          .filter(Synonym.type == 'gene')
+                          .filter(Synonym.ome_id == gene_db.id)
+                          .filter(Synonym.synonym == old_bigg_id)
+                          .filter(Synonym.data_source_id == data_source_id)
+                          .first())
+            if synonym_db is None:
+                synonym_db = Synonym(type='gene',
+                                     ome_id=gene_db.id,
+                                     synonym=old_bigg_id,
+                                     data_source_id=data_source_id)
+                session.add(synonym_db)
+                session.commit()
+            # add OldIDSynonym
+            old_id_db = (session
+                         .query(OldIDSynonym)
+                         .filter(OldIDSynonym.type == 'model_gene')
+                         .filter(OldIDSynonym.ome_id == model_gene_db.id)
+                         .filter(OldIDSynonym.synonym_id == synonym_db.id)
+                         .first())
+            if old_id_db is None:
+                old_id_db = OldIDSynonym(type='model_gene',
+                                        ome_id=model_gene_db.id,
+                                        synonym_id=synonym_db.id)
+                session.add(old_id_db)
+                session.commit()
+
+        # find model reaction
+        try:
+            model_reaction_db_ids = gene_bigg_id_to_model_reaction_db_ids[gene.id]
+        except KeyError:
+            # error message above
+            continue
+
+        for mr_db_id in model_reaction_db_ids:
+            # add to the GeneReactionMatrix, if not already present
+            found_gene_reaction_row = (session
+                                       .query(GeneReactionMatrix)
+                                       .filter(GeneReactionMatrix.model_gene_id == model_gene_db.id)
+                                       .filter(GeneReactionMatrix.model_reaction_id == mr_db_id)
+                                       .count() > 0)
+            if not found_gene_reaction_row:
+                new_object = GeneReactionMatrix(model_gene_id=model_gene_db.id,
+                                                model_reaction_id=mr_db_id)
+                session.add(new_object)
+
+            # update the gene_reaction_rule if the gene id has changed
+            if gene.id != gene_db.bigg_id:
+                mr = session.query(ModelReaction).get(mr_db_id)
+                new_rule = _replace_gene_str(mr.gene_reaction_rule, gene.id,
+                                             gene_db.bigg_id)
+                (session
+                .query(ModelReaction)
+                .filter(ModelReaction.id == mr_db_id)
+                .update({ModelReaction.gene_reaction_rule: new_rule}))
+
+
+def load_model_count(session, model_db_id):
+    metabolite_count = (session
+                        .query(ModelCompartmentalizedComponent.id)
+                        .filter(ModelCompartmentalizedComponent.model_id == model_db_id)
+                        .count())
+    reaction_count = (session
+                      .query(ModelReaction.id)
+                      .filter(ModelReaction.model_id == model_db_id)
+                      .count())
+    gene_count = (session
+                  .query(ModelGene.id)
+                  .filter(ModelGene.model_id == model_db_id)
+                  .count())
+    mc = ModelCount(model_id=model_db_id,
+                    gene_count=gene_count,
+                    metabolite_count=metabolite_count,
+                    reaction_count=reaction_count)
+    session.add(mc)

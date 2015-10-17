@@ -1,118 +1,226 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
-from ome import base,settings,components,datasets,models,timing
+# configure the logger before imports so other packages do not override this
+# setup
+import logging
+import time
+import sys
 
+def configure_logger(log_file=None, level=logging.INFO, overwrite_log=True,
+                     format=logging.BASIC_FORMAT):
+    # console and file
+    if log_file is None:
+        logging.basicConfig(stream=sys.stdout, level=level, format=format)
+    else:
+        logging.basicConfig(filename=log_file, level=level,
+                            filemode=('w' if overwrite_log else 'a'),
+                            format=format)
+        console = logging.StreamHandler()
+        console.setLevel(level)
+        console.setFormatter(logging.Formatter(format))
+        logging.getLogger("").addHandler(console)
+configure_logger('%s OME load_db.log' % time.strftime('%Y-%m-%d %H:%M:%S'),
+                 level=logging.INFO)
+
+
+from ome import base, settings, components, datasets, models, timing, util
+from ome.loading import AlreadyLoadedError
 from ome.loading import dataset_loading
 from ome.loading import component_loading
+from ome.loading.component_loading import BadGenomeError, get_genbank_accessions
 from ome.loading import model_loading
+from ome.loading import map_loading
+from ome.loading import version_loading
 
-from sqlalchemy.schema import Sequence,CreateSequence
-from pymongo import ASCENDING
-import sys
 import os
+from os import listdir
+from os.path import join, isfile
+import argparse
+from collections import defaultdict
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--drop-all', help='Empty database and reload data. NOTE: Does not drop types (e.g. enum categories)', action='store_true')
+parser.add_argument('--drop-models', help='Empty model and map data', action='store_true')
+parser.add_argument('--drop-maps', help='Empty map data', action='store_true')
+parser.add_argument('--skip-genomes', help='Skip genome loading', action='store_true')
+parser.add_argument('--skip-models', help='Skip model loading', action='store_true')
+parser.add_argument('--skip-maps', help='Skip map loading', action='store_true')
+
+args = parser.parse_args()
+
+
+def drop_all_tables(engine, enums_to_drop=None):
+    """Drops all tables and, optionally, user enums from a postgres database.
+
+    Adapted from: http://www.siafoo.net/snippet/85
+
+
+    NOTE: To list all the user defined enums, use something like this:
+
+        SELECT DISTINCT t.typname
+        FROM pg_catalog.pg_type t
+        JOIN pg_catalog.pg_enum e ON t.oid = e.enumtypid;
+
+    """
+
+    from sqlalchemy.sql.expression import text
+
+    table_sql = ("SELECT table_name FROM information_schema.tables "
+                 "WHERE table_schema='public' AND table_name NOT LIKE 'pg_%%'")
+
+    for table in [name for (name, ) in engine.execute(text(table_sql))]:
+        engine.execute(text('DROP TABLE %s CASCADE' % table))
+
+    # drop the enum types
+    if enums_to_drop is not None:
+        for enum in enums_to_drop:
+            engine.execute(text('DROP TYPE IF EXISTS %s CASCADE' % enum))
 
 
 if __name__ == "__main__":
+    if args.drop_all:
+        logging.info("Dropping everything from the database")
+        drop_all_tables(base.engine, base.custom_enums.keys())
 
-    if not dataset_loading.query_yes_no('This will drop the ENTIRE database and load from scratch, ' + \
-                        'are you sure you want to do this?'): sys.exit()
-
-    base.Base.metadata.drop_all()
+    logging.info("Building the database models")
     base.Base.metadata.create_all()
 
-    try: base.omics_database.genome_data.drop()
-    except: None
-    #base.engine.execute(CreateSequence(Sequence('wids')))
+    if args.drop_models:
+        logging.info('Dropping rows from models')
+        connection = base.engine.connect()
+        trans = connection.begin()
+        try:
+            connection.execute('TRUNCATE model, reaction, component, compartment CASCADE;')
+            trans.commit()
+        except:
+            trans.rollback()
 
-
-    for genbank_file in os.listdir(settings.data_directory+'annotation/genbank'):
-        #if genbank_file not in ['NC_000913.2.gb']: continue
-
-        component_loading.load_genome(genbank_file, base, components, debug=False)
-
-
+    # make the session
     session = base.Session()
 
-    data_genomes = session.query(base.Genome).filter(base.Genome.bioproject_id.in_(['PRJNA57779'])).all()
+    # load the date
+    version_loading.load_version_date(session)
+
+    # get the models and genomes
+    model_dir = settings.model_directory
+    model_genome_path = settings.model_genome
+    logging.info('Loading models and genomes using %s' % model_genome_path)
+    lines = util.load_tsv(model_genome_path, required_column_num=3)
+    models_list = []
+
+    def _check_for_additional_gb_filenames(ref_string_plus):
+        spl = [x.strip() for x in ref_string_plus.split(',')]
+        if len(spl) == 1:
+            return spl[0], None
+        else:
+            return spl[0], spl[1:]
+
+    for line in lines:
+        model_filename, pub_ref_string, genome_ref_string_plus = line
+        if genome_ref_string_plus is None:
+            genome_ref = None
+            additional_gb_filenames = None
+        else:
+            genome_ref_string, additional_gb_filenames = _check_for_additional_gb_filenames(genome_ref_string_plus)
+            genome_ref = util.ref_str_to_tuple(genome_ref_string)
+        if pub_ref_string is None:
+            pub_ref = None
+        else:
+            pub_ref = util.ref_str_to_tuple(pub_ref_string)
+        models_list.append({'model_filename': model_filename,
+                            'pub_ref': pub_ref,
+                            'genome_ref': genome_ref,
+                            'additional_gb_filenames': additional_gb_filenames})
+
+    genomes_for_models = {}
+    if not args.skip_genomes:
+        # find the accessions for the genbank files
+        logging.info('Finding GenBank files')
+        refseq_dir = settings.refseq_directory
+
+        # unique refs and additional files for accessions. Any conflicting
+        # repeats will raise exception.
+        genome_refs = set()
+        additional_gb_filenames_dict = defaultdict(set)
+        genome_ref_additions = {}
+        for d in models_list:
+            genome_ref = d['genome_ref']
+            if genome_ref is None:
+                continue
+            genome_refs.add(genome_ref)
+            additional_gb_filenames = d['additional_gb_filenames']
+            if additional_gb_filenames is None:
+                continue
+            if genome_ref in genome_ref_additions and set(genome_ref_additions[genome_ref]) != set(additional_gb_filenames):
+                raise Exception('Conflicting additional files genome ref with %s %s' % genome_ref)
+            for add in additional_gb_filenames:
+                additional_gb_filenames_dict[add].add(genome_ref)
+            genome_ref_additions[genome_ref] = additional_gb_filenames
+
+        # loop through all the files
+        genome_file_locations = defaultdict(list)
+        for refseq_filename in listdir(refseq_dir):
+            refseq_filepath = join(refseq_dir, refseq_filename)
+            if refseq_filename.startswith('.') or not isfile(refseq_filepath):
+                continue
+            # check both accession and assembly for a match
+            ids = get_genbank_accessions(refseq_filepath, fast=True)
+            # if the ids couldn't be found
+            if all(x is None for x in ids.values()):
+                logging.warn('Could not find accessions for genbank file %s' % refseq_filepath)
+                continue
+            # look for matching ids from the model-genome file
+            found = False
+            for genome_ref in ids.iteritems():
+                if genome_ref in genome_refs:
+                    genome_file_locations[genome_ref].append(refseq_filepath)
+                    found = True
+            # also look for additional files
+            if refseq_filename in additional_gb_filenames_dict:
+                for genome_ref in additional_gb_filenames_dict[refseq_filename]:
+                    genome_file_locations[genome_ref].append(refseq_filepath)
+                found = True
+            # warn about unused files
+            if not found:
+                logging.warn('Unused file in the refseq directory: %s' % refseq_filename)
+
+        # load the genomes
+        n = len(genome_refs)
+        for i, genome_ref in enumerate(genome_refs):
+            logging.info('Loading genome ({} of {}) with {} {}'
+                         .format(i + 1, n, genome_ref[0], genome_ref[1]))
+            file_paths = genome_file_locations[genome_ref]
+            try:
+                component_loading.load_genome(genome_ref, file_paths, session)
+            except AlreadyLoadedError as e:
+                logging.info(str(e))
+            except Exception as e:
+                logging.exception(e)
 
 
-    raw_flag = False
-    normalize_flag = False
+    if not args.skip_models:
+        logging.info("Loading models")
+        n = len(models_list)
+        model_dir = settings.model_directory
+        for i, model_dict in enumerate(models_list):
+            logging.info('Loading model ({} of {}) {}'
+                         .format(i + 1, n, model_dict['model_filename']))
+            try:
+                model_loading.load_model(join(model_dir, model_dict['model_filename']),
+                                         model_dict['pub_ref'],
+                                         model_dict['genome_ref'],
+                                         session)
+            except AlreadyLoadedError as e:
+                logging.info(str(e))
+            except Exception as e:
+                logging.error('Could not load model %s.' % model_filename)
+                logging.exception(e)
 
-    for genome in data_genomes:
-
-        for chromosome in genome.chromosomes:
-            component_loading.write_chromosome_annotation_gff(base, components, chromosome)
-
-        """
-        dataset_loading.load_raw_files(settings.data_directory+'/chip_experiment/bam/crp', group_name='crp', normalize=normalize_flag, raw=raw_flag)
-        dataset_loading.load_raw_files(settings.data_directory+'/chip_experiment/bam/yome', group_name='yome', normalize=normalize_flag, raw=raw_flag)
-
-        dataset_loading.load_raw_files(settings.data_directory+'/chip_experiment/gff', group_name='trn', normalize=False, raw=raw_flag)
-
-        dataset_loading.load_raw_files(settings.data_directory+'/rnaseq_experiment/fastq/crp', group_name='crp', normalize=False, raw=False)
-        dataset_loading.load_raw_files(settings.data_directory+'/rnaseq_experiment/fastq/yome', group_name='yome', normalize=False, raw=False)
-        #dataset_loading.load_raw_files(settings.data_directory+'/rnaseq_experiment/bam', normalize=True)
-        #dataset_loading.load_raw_files(settings.data_directory+'/chip_experiment/bam', normalize=False)
-        dataset_loading.load_raw_files(settings.data_directory+'/microarray/asv2', group_name='asv2', raw=False)
-        dataset_loading.load_raw_files(settings.data_directory+'/microarray/ec2', group_name='ec2', raw=False)
-
-
-        experiment_sets = dataset_loading.query_experiment_sets()
-        dataset_loading.load_experiment_sets(experiment_sets)
-
-
-        for chromosome in genome.chromosomes:
-            component_loading.load_metacyc_proteins(base, components, chromosome)
-            component_loading.load_metacyc_bindsites(base, components, chromosome)
-            component_loading.load_metacyc_transcription_units(base, components, chromosome)
-
-        old_gff_file = settings.data_directory+'/annotation/NC_000913.2_old.gff'
-
-        #dataset_loading.run_cuffquant(base, datasets, genome, group_name='crp', debug=False)
-        #dataset_loading.run_cuffnorm(base, datasets, genome, group_name='crp', gff_file=old_gff_file, debug=False, overwrite=True)
-        #dataset_loading.run_cuffnorm(base, datasets, genome, group_name='yome', debug=False, overwrite=True)
-        #dataset_loading.run_cuffdiff(base, datasets, genome, group_name='crp', gff_file=old_gff_file, debug=False, overwrite=True)
-        #dataset_loading.run_cuffdiff(base, datasets, genome, group_name='yome', debug=False, overwrite=True)
-        #dataset_loading.run_gem(base, datasets, genome, debug=True)
-
-
-        dataset_loading.load_gem(session.query(ChIPPeakAnalysis).all(), base, datasets, genome)
-        dataset_loading.load_gff_chip_peaks(session.query(ChIPPeakAnalysis).all(), base, datasets, genome, group_name='gff-BK')
-
-        dataset_loading.load_extra_analyses(base, datasets, genome, settings.data_directory+'/ChIP_peaks/gps-curated-HL28Aug14', group_name='gps-curated-HL28Aug14')
-        dataset_loading.load_gff_chip_peaks(session.query(ChIPPeakAnalysis).all(), base, datasets, genome, group_name='gps-curated-HL28Aug14')
-
-        component_loading.load_kegg_pathways(base, components)
-
-        dataset_loading.load_cuffnorm(base, datasets, group_name='crp')
-        dataset_loading.load_cuffnorm(base, datasets, group_name='yome')
-        dataset_loading.load_cuffdiff(group_name='crp')
-        dataset_loading.load_cuffdiff(group_name='yome')
-
-        dataset_loading.load_arraydata(settings.data_directory+'/microarray/formatted_asv2.txt', group_name='asv2')
-        dataset_loading.load_arraydata(settings.data_directory+'/microarray/formatted_ec2.txt', group_name='ec2')
-
-        dataset_loading.run_array_ttests(base, datasets, genome, group_name='asv2')
-        dataset_loading.run_array_ttests(base, datasets, genome, group_name='ec2')
-
-        dataset_loading.make_genome_region_map(base, datasets, genome)
-        """
-
-
-
-    with open(settings.data_directory+'/annotation/model-genome.txt') as file:
-
-        for line in file:
-            model_id,genome_id,model_creation_timestamp = line.rstrip('\n').split(',')
-
-            model_loading.load_model(model_id, genome_id, model_creation_timestamp)
-
-
-
-    genome_data = base.omics_database.genome_data
-
-    genome_data.create_index([("data_set_id",ASCENDING), ("leftpos", ASCENDING)])
+    if not args.skip_maps:
+        logging.info("Loading Escher maps")
+        map_loading.load_maps_from_server(session, drop_maps=(args.drop_models or
+                                                              args.drop_maps))
 
     session.close()
-
+    base.Session.close_all()
