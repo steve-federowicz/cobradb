@@ -228,7 +228,6 @@ class GeneGrouping(Base):
     __table_args__ = (UniqueConstraint('group_id','gene_id'),{})
 
 
-
 class GeneGroup(Base):
     __tablename__ = 'gene_group'
 
