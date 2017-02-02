@@ -6,7 +6,7 @@ postgres_host = localhost
 postgres_port = 5432
 
 # Set user here or set environment variable COBRADB_POSTGRES_USER
-postgres_user = user
+postgres_user = cobra_user
 
 # Set password here or set environment variable COBRADB_POSTGRES_PASSWORD
 postgres_password =
