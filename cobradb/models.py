@@ -1,16 +1,15 @@
-from cobradb.base import *
-from cobradb.components import *
+from cobradb.base import Base
 
 from sqlalchemy import (create_engine, ForeignKey, Column, Integer, String,
                         Numeric, Table, MetaData, DateTime, LargeBinary)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.schema import Sequence
 
 
 class Model(Base):
-    __tablename__='model'
+    __tablename__ = 'model'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
     bigg_id = Column(String, nullable=False)
@@ -28,7 +27,7 @@ class Model(Base):
 
 
 class ModelGene(Base):
-    __tablename__='model_gene'
+    __tablename__ = 'model_gene'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
     model_id = Column(Integer,
@@ -44,7 +43,7 @@ class ModelGene(Base):
 
 
 class ModelReaction(Base):
-    __tablename__='model_reaction'
+    __tablename__ = 'model_reaction'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
     reaction_id = Column(Integer,
@@ -67,8 +66,8 @@ class ModelReaction(Base):
     )
 
     def __repr__(self):
-        return ('<ome ModelReaction(id={self.id}, reaction_id={self.reaction_id}, model_id={self.model_id}, copy_number={self.copy_number})>'
-                .format(self=self))
+        return ('<ome ModelReaction(id={self.id}, reaction_id={self.reaction_id}, '
+                'model_id={self.model_id}, copy_number={self.copy_number})>'.format(self=self))
 
 
 class GeneReactionMatrix(Base):
@@ -78,7 +77,7 @@ class GeneReactionMatrix(Base):
     model_gene_id = Column(Integer,
                            ForeignKey('model_gene.id', onupdate="CASCADE", ondelete="CASCADE"),
                            nullable=False)
-    model_reaction_id = Column(Integer,
+    model_reaction_id = Column(Integer, 
                                ForeignKey('model_reaction.id', onupdate="CASCADE", ondelete="CASCADE"),
                                nullable=False)
 
@@ -87,12 +86,13 @@ class GeneReactionMatrix(Base):
     )
 
     def __repr__(self):
-        return ('<ome GeneReactionMatrix(id={self.id}, model_gene_id={self.model_gene_id}, model_reaction_id={self.model_reaction_id})>'
-                .format(self=self))
+        return ('<ome GeneReactionMatrix(id={self.id}, model_gene_id={self.model_gene_id}, '
+                'model_reaction_id={self.model_reaction_id})>'.format(self=self))
 
 
 class CompartmentalizedComponent(Base):
-    __tablename__='compartmentalized_component'
+    __tablename__ = 'compartmentalized_component'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     component_id = Column(Integer,
                           ForeignKey('component.id', onupdate="CASCADE", ondelete="CASCADE"),
@@ -107,7 +107,8 @@ class CompartmentalizedComponent(Base):
 
 
 class ModelCompartmentalizedComponent(Base):
-    __tablename__='model_compartmentalized_component'
+    __tablename__ = 'model_compartmentalized_component'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     model_id = Column(Integer,
                       ForeignKey('model.id', onupdate="CASCADE", ondelete="CASCADE"),
@@ -125,8 +126,9 @@ class ModelCompartmentalizedComponent(Base):
 
 class Compartment(Base):
     __tablename__ = 'compartment'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
-    bigg_id  = Column(String, unique = True)
+    bigg_id = Column(String, unique=True)
     name = Column(String)
 
     def __repr__(self):
@@ -136,6 +138,7 @@ class Compartment(Base):
 
 class ReactionMatrix(Base):
     __tablename__ = 'reaction_matrix'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     reaction_id = Column(Integer, ForeignKey('reaction.id'), nullable=False)
     compartmentalized_component_id = Column(Integer,
@@ -151,6 +154,7 @@ class ReactionMatrix(Base):
 
 class EscherMap(Base):
     __tablename__ = 'escher_map'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     map_name = Column(String, nullable=False)
     map_data = Column(LargeBinary, nullable=False)
@@ -164,6 +168,7 @@ class EscherMap(Base):
 
 class EscherMapMatrix(Base):
     __tablename__ = 'escher_map_matrix'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     ome_id = Column(Integer, nullable=False)
     escher_map_id = Column(Integer, ForeignKey(EscherMap.id), nullable=False)
@@ -177,7 +182,8 @@ class EscherMapMatrix(Base):
 
 
 class ModelCount(Base):
-    __tablename__='model_count'
+    __tablename__ = 'model_count'
+
     id = Column(Integer, primary_key=True)
     model_id = Column(Integer,
                       ForeignKey('model.id', onupdate="CASCADE", ondelete="CASCADE"),

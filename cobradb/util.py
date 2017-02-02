@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cobradb.base import *
+from cobradb.base import Session, 
 from cobradb import settings
 
 import re
@@ -61,8 +61,8 @@ def load_tsv(filename, required_column_num=None):
     if required_column_num is not None:
         def check_row(row):
             if len(row) != required_column_num:
-                logging.warn('Line in {} should have {} columns, but found {}: {}'
-                             .format(filename, required_column_num, len(row), row))
+                logging.warning('Line in {} should have {} columns, but found {}: {}'
+                                .format(filename, required_column_num, len(row), row))
                 return None
             return row
         rows = [x for x in (check_row(r) for r in rows) if x is not None]
@@ -72,7 +72,9 @@ def load_tsv(filename, required_column_num=None):
 
 def _find_data_source_url(bigg_id, url_prefs):
     """Return (bigg_id, name, url prefix) for data source name."""
-    name = None; url_prefix = None
+    name = None
+    url_prefix = None
+
     for row in url_prefs:
         if row[0] == bigg_id:
             if len(row) == 1:
@@ -116,9 +118,9 @@ def get_or_create_data_source(session, bigg_id):
                                                url_prefix=url_prefix)
         if not exists:
             if name is None:
-                logging.warn('No name found for data source %s' % bigg_id)
+                logging.warning('No name found for data source %s', bigg_id)
             if url_prefix is None:
-                logging.warn('No URL found for data source %s' % bigg_id)
+                logging.warning('No URL found for data source %s', bigg_id)
     return data_source_db.id
 
 
@@ -199,10 +201,10 @@ def timing(function):
             name = function.__name__
         except AttributeError:
             name = function.func_name
-        logging.debug('starting %s' % name)
+        logging.debug('starting %s', name)
         stdout.flush()
         start = time()
         res = function(*args, **kwargs)
-        logging.debug('%s complete (%.2f sec)'% (name, time() - start))
+        logging.debug('%s complete (%.2f sec)', name, time() - start)
         return res
     return wrapper

@@ -70,8 +70,8 @@ except NoOptionError:
 
 # these are optional
 for data_pref in ['compartment_names', 'reaction_id_prefs',
-                    'reaction_hash_prefs', 'gene_reaction_rule_prefs',
-                    'data_source_preferences']:
+                  'reaction_hash_prefs', 'gene_reaction_rule_prefs',
+                  'data_source_preferences']:
     try:
         setattr(self, data_pref, expanduser(config.get('DATA', data_pref)))
     except NoOptionError:

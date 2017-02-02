@@ -1,6 +1,6 @@
-from cobradb.base import *
+from cobradb.base import (Base, Component, GenomeRegion, Session)
 
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, aliased
 from sqlalchemy import Table, MetaData, create_engine, Column, Integer, \
     String, Float, ForeignKey, select, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -23,23 +23,8 @@ class Gene(GenomeRegion):
     __mapper_args__ = {'polymorphic_identity': 'gene'}
 
     def __repr__(self):
-        return '<cobradb Gene(id=%d, bigg_id=%s, name=%s)>' % (self.id, self.bigg_id,
-                                                         self.name)
-
-
-class Motif(GenomeRegion):
-    __tablename__ = 'motif'
-
-    id = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
-    pval = Column(Float)
-
-    bound_component_id = Column(Integer, ForeignKey('component.id'))
-    bound_component = relationship("Component")
-
-    def __repr__(self):
-        return "Motif (%s) %d-%d %s %5.2f"% \
-            (self.bound_component.name, self.leftpos, self.rightpos,\
-                                 self.strand, self.pval)
+        return '<cobradb Gene(id=%d, bigg_id=%s, name=%s)>' % \
+                (self.id, self.bigg_id, self.name)
 
 
 class ComplexComposition(Base):
@@ -49,7 +34,7 @@ class ComplexComposition(Base):
     component_id = Column(Integer, ForeignKey('component.id'), primary_key=True)
     stoichiometry = Column(Integer)
 
-    __table_args__ = (UniqueConstraint('complex_id','component_id'),{})
+    __table_args__ = (UniqueConstraint('complex_id', 'component_id'), {})
 
 
 class Complex(Component):
@@ -60,7 +45,7 @@ class Complex(Component):
     id = Column(Integer, ForeignKey('component.id'), primary_key=True)
 
     children = relationship("Component", secondary="complex_composition",
-                            primaryjoin = id == ComplexComposition.complex_id,
+                            primaryjoin=id == ComplexComposition.complex_id,
                             backref="parent")
 
     @hybrid_property
@@ -68,7 +53,7 @@ class Complex(Component):
         session = Session()
         included_components = (session
                                .query(ComplexComposition.complex_id, ComplexComposition.component_id)
-                               .filter(ComplexComposition.complex_id==self.id)
+                               .filter(ComplexComposition.complex_id == self.id)
                                .cte(name="included_components", recursive=True))
 
         incl_alias = aliased(included_components, name="incl_cplx")
@@ -76,12 +61,12 @@ class Complex(Component):
         included_components = (included_components
                                .union_all(session
                                           .query(complex_alias.complex_id, complex_alias.component_id)
-                                          .filter(complex_alias.complex_id==incl_alias.c.component_id)))
+                                          .filter(complex_alias.complex_id == incl_alias.c.component_id)))
 
         return (session
                 .query(Component)
                 .join(included_components,
-                      Component.id==included_components.c.component_id)
+                      Component.id == included_components.c.component_id)
                 .all())
 
     def __repr__(self):
@@ -120,21 +105,6 @@ class DNA(Component):
                                             self.genome_region.strand))
 
 
-class DnaBindingSite(DNA):
-    __tablename__ = 'dna_binding_site'
-
-    id = Column(Integer, ForeignKey('dna.id'), primary_key=True)
-    centerpos = Column(Integer)
-    width = Column(Integer)
-
-    __mapper_args__ = { 'polymorphic_identity': 'binding_site' }
-
-    def __init__(self, name, leftpos, rightpos, strand, chromosome_id, centerpos, width):
-        super(DnaBindingSite, self).__init__(name, leftpos, rightpos, strand, chromosome_id)
-        self.centerpos = centerpos
-        self.width = width
-
-
 class RNA(Component):
     __tablename__ = 'rna'
 
@@ -142,7 +112,7 @@ class RNA(Component):
 
     genome_region_id = Column(Integer, ForeignKey('genome_region.id'))
 
-    __mapper_args__ = { 'polymorphic_identity': 'rna' }
+    __mapper_args__ = {'polymorphic_identity': 'rna'}
 
     def __init__(self, bigg_id, name, leftpos=None, rightpos=None, strand=None, chromosome_id=None):
         super(RNA, self).__init__(bigg_id, name)
@@ -157,50 +127,10 @@ class RNA(Component):
             (self.id, self.bigg_id)
 
 
-class TUGenes(Base):
-    __tablename__ = 'tu_genes'
-
-    tu_id = Column(Integer, ForeignKey('tu.id'), primary_key=True)
-    gene_id = Column(Integer, ForeignKey('gene.id'), primary_key=True)
-
-    __table_args__ = (UniqueConstraint('tu_id','gene_id'),{})
-
-    def __init__(self, tu_id, gene_id):
-        self.tu_id = tu_id
-        self.gene_id = gene_id
-
-
-class TU(RNA):
-    __tablename__ = 'tu'
-
-    id = Column(Integer, ForeignKey('rna.id'), primary_key=True)
-    genome_region = relationship("GenomeRegion")
-    genes = relationship("Gene", secondary="tu_genes", backref="tu",
-                         primaryjoin=(id == TUGenes.tu_id))
-
-    __mapper_args__ = { 'polymorphic_identity': 'tu' }
-
-    """
-    @hybrid_property
-    def tss(self):
-        if self.genome_region.strand == '+':
-            return self.genome_region.leftpos
-        else:
-            return self.genome_region.rightpos
-    """
-
-    def __init__(self, name, leftpos, rightpos, strand, genome_id):
-        super(TU, self).__init__(name, leftpos, rightpos, strand, genome_id)
-
-    def __repr__(self):
-        return "TU (#%d, %s)" % \
-            (self.id, self.name)
-
-
 class Protein(Component):
     __tablename__ = 'protein'
 
-    __mapper_args__ ={ 'polymorphic_identity': 'protein'}
+    __mapper_args__ = {'polymorphic_identity': 'protein'}
 
     id = Column(Integer, ForeignKey('component.id'), primary_key=True)
     gene_id = Column(Integer, ForeignKey('gene.id'))
@@ -227,11 +157,12 @@ class GeneGrouping(Base):
     group_id = Column(Integer, ForeignKey('gene_group.id'), primary_key=True)
     gene_id = Column(Integer, ForeignKey('gene.id'), primary_key=True)
 
-    __table_args__ = (UniqueConstraint('group_id','gene_id'),{})
+    __table_args__ = (UniqueConstraint('group_id', 'gene_id'), {})
 
     def __init__(self, group_id, gene_id):
         self.group_id = group_id
         self.gene_id = gene_id
+
 
 class GeneGroup(Base):
     __tablename__ = 'gene_group'
@@ -239,11 +170,11 @@ class GeneGroup(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100))
 
-    genes = relationship("Gene", secondary="gene_grouping",\
-                                 primaryjoin = id == GeneGrouping.group_id,\
-                                 backref="groups")
+    genes = relationship("Gene", secondary="gene_grouping",
+                         primaryjoin=id == GeneGrouping.group_id,
+                         backref="groups")
 
-    __table_args__ = (UniqueConstraint('name'),{})
+    __table_args__ = (UniqueConstraint('name'), {})
 
     def __repr__(self):
         return "Gene Group (#%d, %s): %s" % \

@@ -1,4 +1,5 @@
 """Module to implement ORM to the ome database"""
+import logging
 
 from cobradb import settings
 
@@ -12,7 +13,6 @@ from types import MethodType
 from os import system
 from contextlib import contextmanager
 from sqlalchemy.schema import Sequence
-import logging
 
 
 # connect to postgres
@@ -32,7 +32,7 @@ _enum_l = [
          name='old_id_synonym_type'),
     Enum('is_version', name='is_version')
 ]
-custom_enums = { x.name: x for x in _enum_l }
+custom_enums = {x.name: x for x in _enum_l}
 
 
 # exceptions
@@ -86,12 +86,13 @@ class Chromosome(Base):
     )
 
     def __repr__(self):
-        return ('<ome Chromosome(id={self.id}, ncbi_accession={self.ncbi_accession}, genome_id={self.genome_id})>'
-                .format(self=self))
+        return ('<ome Chromosome(id={self.id}, ncbi_accession={self.ncbi_accession}, '
+                'genome_id={self.genome_id})>'.format(self=self))
 
 
 class GenomeRegion(Base):
     __tablename__ = 'genome_region'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     chromosome_id = Column(Integer, ForeignKey('chromosome.id'))
     bigg_id = Column(String, nullable=False)
@@ -179,6 +180,7 @@ class DataSource(Base):
 
 class Synonym(Base):
     __tablename__ = 'synonym'
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     ome_id = Column(Integer)
     synonym = Column(String)
@@ -196,17 +198,19 @@ class Synonym(Base):
 
 class Publication(Base):
     __tablename__ = "publication"
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     reference_type = Column(custom_enums['reference_type'])
     reference_id = Column(String)
 
-    __table_args__=(
+    __table_args__ = (
         UniqueConstraint('reference_type', 'reference_id'),
     )
 
 
 class PublicationModel(Base):
     __tablename__ = "publication_model"
+
     model_id = Column(Integer,
                       ForeignKey('model.id', ondelete='CASCADE'),
                       primary_key=True)
@@ -221,6 +225,7 @@ class PublicationModel(Base):
 
 class OldIDSynonym(Base):
     __tablename__ = "old_id_model_synonym"
+
     id = Column(Integer, Sequence('wids'), primary_key=True)
     type = Column(custom_enums['old_id_synonym_type'])
     synonym_id = Column(Integer,
@@ -238,14 +243,15 @@ class OldIDSynonym(Base):
 
 
 class GenomeRegionMap(Base):
-        __tablename__ = 'genome_region_map'
+    __tablename__ = 'genome_region_map'
 
-        genome_region_id_1 = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
-        genome_region_id_2 = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
-        distance = Column(Integer)
+    genome_region_id_1 = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
+    genome_region_id_2 = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
+    distance = Column(Integer)
 
-        __table_args__ = (UniqueConstraint('genome_region_id_1','genome_region_id_2'),{})
+    __table_args__ = (UniqueConstraint('genome_region_id_1', 'genome_region_id_2'), {})
 
 
-        def __repr__(self):
-            return "GenomeRegionMap (%d <--> %d) distance:%d" % (self.genome_region_id_1, self.genome_region_id_2, self.distance)
+    def __repr__(self):
+        return ('<cobradb GenomeRegionMap(%d <--> %d) distance:%d>' %
+                (self.genome_region_id_1, self.genome_region_id_2, self.distance))
