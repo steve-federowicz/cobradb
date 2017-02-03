@@ -34,6 +34,7 @@ setup(
     ],
     keywords='systems biology, genome-scale model',
     packages=find_packages(),
+    package_data={'cobradb':  ['settings.ini']},
     install_requires=['SQLAlchemy>=1.0.12',
                       'cobra>=0.4.0',
                       'numpy>=1.9.1',

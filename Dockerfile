@@ -28,12 +28,11 @@ EXPOSE 5432
 
 USER root
 
-RUN git clone https://github.com/steve-federowicz/ome.git cobradb
+RUN git clone https://github.com/steve-federowicz/cobradb.git cobradb
 
 RUN pip install ./cobradb 
 
-RUN cd bin && \
-    ./load_db --drop-all
+RUN ./cobradb/bin/load_db --drop-all
 
 CMD bash -C '/bin/bash'
 
