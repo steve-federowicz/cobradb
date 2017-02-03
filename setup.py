@@ -22,8 +22,8 @@ setup(
     description="""COBRAdb loads genome-scale metabolic models and genome
                    annotations into a relational database.""",
     url='https://github.com/SBRG/cobradb',
-    author='Zachary King',
-    author_email='zaking@ucsd.edu',
+    author='Zachary King, Stephen Federowicz',
+    author_email='zaking@ucsd.edu, sfederow@gmail.com',
     license='MIT',
     classifiers=[
         'License :: OSI Approved :: MIT License',
