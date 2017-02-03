@@ -1,7 +1,7 @@
-The OME Framework
+COBRAdb
 ==
 
-The OME Framework is a systems biology and bioinformatics framework that helps to enable a broad array of iterative and evolving systems biology workflows.
+COBRAdb is a database for COBRA models, genomes, and biological datasets.
 
 ##[Installation](INSTALL.md)
 
@@ -18,17 +18,17 @@ The OME Framework is a systems biology and bioinformatics framework that helps t
 
 The framework is written entirely in python with great help from [SQLalchemy](http://www.sqlalchemy.org/). You can browse the schemas below to get a sense of the underlying database design or jump straight to the examples page. Enjoy!
 
-<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/ome/master/docs/data_schema.xml#" target="_blank">data schema</a>
+<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/cobradb/master/docs/data_schema.xml#" target="_blank">data schema</a>
 
-<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/ome/master/docs/model_schema.xml#" target="_blank">model schema</a>
+<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/cobradb/master/docs/model_schema.xml#" target="_blank">model schema</a>
 
-<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/ome/master/docs/component_schema.xml#" target="_blank">component schema</a>
+<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/cobradb/master/docs/component_schema.xml#" target="_blank">component schema</a>
 
-<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/ome/master/docs/combined_schema.xml#" target="_blank">combined schema</a>
+<a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/cobradb/master/docs/combined_schema.xml#" target="_blank">combined schema</a>
 
 
-###Why the OME Framework?
+###Why COBRAdb?
 
 Most biological analyses and analysis tools are focused on working with a relatively limited subset of data concerned with a specific study or question of interest.  However, as the sequencing and synthesis of DNA surges ahead it becomes clear that we will soon generate 10 replicates instead of 3, cross reference 10 historic datasets instead of 1, and most importantly begin to get a level of quantitation that will enable true biological engineering.  
 
-The OME Framework is a small step towards a future that amasses, manages, and processes biological data at a systems scale.
+COBRAdb is a small step towards a future that amasses, manages, and processes biological data at a systems scale.
