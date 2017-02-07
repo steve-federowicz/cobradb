@@ -26,8 +26,6 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/9.6/main/postgresql.conf
 # Expose the PostgreSQL port
 EXPOSE 5432
 
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
-
 USER root
 
 RUN git clone https://github.com/steve-federowicz/cobradb.git cobradb
@@ -38,14 +36,19 @@ RUN cd cobradb && \
     git merge 3e2d27598f0763eefc4f377db1466a931f6070ae
 
 ADD cobradb/cobradb/settings.ini /cobradb/cobradb/settings.ini
+ADD cobradb/bin/start.sh /cobradb/bin/start.sh
 
 ADD cobra_data /cobra_data
 
-RUN pip install ./cobradb 
+RUN pip install ./cobradb
 
-RUN su postgres -c '/etc/init.d/postgresql start' && \
-    ./cobradb/bin/load_db --drop-all
+RUN pip install jupyter cobra pandas simplejson
+
+VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 # Set the default command to run when starting the container
-CMD ["su", "postgres", "-c" , "/usr/lib/postgresql/9.6/bin/postgres -D /var/lib/postgresql/9.6/main -c config_file=/etc/postgresql/9.6/main/postgresql.conf"]
+#CMD ["su", "postgres", "-c" , "/usr/lib/postgresql/9.6/bin/postgres -D /var/lib/postgresql/9.6/main -c config_file=/etc/postgresql/9.6/main/postgresql.conf"]
+
+CMD bash -C '/cobradb/bin/start.sh';'/bin/bash'
+
 

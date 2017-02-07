@@ -25,7 +25,7 @@ configure_logger('%s COBRAdb load_db.log' % time.strftime('%Y-%m-%d %H:%M:%S'),
                  level=logging.INFO)
 
 
-from cobradb import base, settings, util
+from cobradb import base, settings, util, datasets
 from cobradb.loading import AlreadyLoadedError
 from cobradb.loading import component_loading
 from cobradb.loading.component_loading import BadGenomeError, get_genbank_accessions
