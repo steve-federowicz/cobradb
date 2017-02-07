@@ -33,16 +33,18 @@ RUN git clone https://github.com/steve-federowicz/cobradb.git cobradb
 RUN cd cobradb && \
     git fetch origin docker && \
     git checkout docker && \
-    git merge a9c5092f7666b853a143a9fb8d582b37aab443a9
+    git merge 3e2d27598f0763eefc4f377db1466a931f6070ae
+
+ADD cobradb/settings.ini /cobradb/cobradb/settings.ini
+ADD build/start.sh /cobradb/build/start.sh
 
 RUN pip install ./cobradb 
-
-RUN ./cobradb/bin/load_db --drop-all
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 USER root
 
 # Set the default command to run when starting the container
-CMD ["su", "postgres", "-c" , "/usr/lib/postgresql/9.6/bin/postgres -D /var/lib/postgresql/9.6/main -c config_file=/etc/postgresql/9.6/main/postgresql.conf"]
+CMD bash -C '/cobradb/build/start.sh';'/bin/bash'
+
 
