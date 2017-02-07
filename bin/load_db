@@ -181,6 +181,7 @@ if __name__ == "__main__":
                     genome_file_locations[genome_ref].append(refseq_filepath)
                     found = True
             # also look for additional files
+
             if refseq_filename in additional_gb_filenames_dict:
                 for genome_ref in additional_gb_filenames_dict[refseq_filename]:
                     genome_file_locations[genome_ref].append(refseq_filepath)

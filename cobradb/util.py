@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from cobradb.base import Session, 
-from cobradb import settings
-
+"""Utility functions"""
 import re
 import os
 import logging
+
 from time import time
 from sys import stdout
+
+from cobradb import settings
+from cobradb.base import DataSource
 
 
 def check_none(v):

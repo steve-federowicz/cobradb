@@ -15,7 +15,7 @@ self = modules[__name__]
 config = SafeConfigParser()
 
 # overwrite defaults settings with settings from the file
-filepath = abspath(join(dirname(__file__), '..', 'settings.ini'))
+filepath = abspath(join(dirname(__file__), 'settings.ini'))
 if isfile(filepath):
     config.read(filepath)
 else:
