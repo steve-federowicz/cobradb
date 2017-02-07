@@ -15,6 +15,7 @@
 # Packages
 *.egg
 *.egg-info
+build
 dist
 eggs
 parts
