@@ -6,8 +6,9 @@ from cobradb.util import get_or_create
 from sqlalchemy.orm import relationship
 from sqlalchemy import (Table, Column, Integer, String, Float, ForeignKey)
 from sqlalchemy.schema import UniqueConstraint, Sequence
-from sqlalchemy.types import JSON, Text
+from sqlalchemy.types import Text
 
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 class Dataset(Base):
@@ -24,7 +25,7 @@ class Dataset(Base):
     type = Column(String(40))
 
     group_name = Column(Text)
-    attributes = Column(JSON)
+    attributes = Column(JSONB)
 
     data_source_id = Column(Integer, ForeignKey('data_source.id', ondelete='CASCADE'))
     data_source = relationship("DataSource")
