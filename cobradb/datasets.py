@@ -3,19 +3,11 @@
 from cobradb.base import (Base, DataSource, Session)
 from cobradb.util import get_or_create
 
-from sqlalchemy.orm import relationship, backref, column_property
-from sqlalchemy import Table, MetaData, create_engine, Column, Integer, \
-    String, Float, ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint, \
-    select, and_, or_
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
+from sqlalchemy import (Table, Column, Integer, String, Float, ForeignKey)
 from sqlalchemy.schema import UniqueConstraint, Sequence
-from sqlalchemy.sql.expression import join
-from sqlalchemy import func
 from sqlalchemy.types import JSON, Text
 
-
-from math import ceil
-import simplejson as json
 
 
 class Dataset(Base):
@@ -32,7 +24,7 @@ class Dataset(Base):
     type = Column(String(40))
 
     group_name = Column(Text)
-    meta_data = Column(JSON)
+    attributes = Column(JSON)
 
     data_source_id = Column(Integer, ForeignKey('data_source.id', ondelete='CASCADE'))
     data_source = relationship("DataSource")
@@ -47,7 +39,7 @@ class Dataset(Base):
             (self.id, self.name)
 
 
-    def __init__(self, name, data_source_id=None, group_name=None, meta_data=None):
+    def __init__(self, name, data_source_id=None, group_name=None, attributes=None):
 
         session = Session()
         if data_source_id is None:
@@ -59,7 +51,7 @@ class Dataset(Base):
         self.name = name
         self.data_source_id = data_source_id
         self.group_name = group_name
-        self.meta_data = meta_data
+        self.attributes = attributes
 
 
 class AnalysisComposition(Base):
