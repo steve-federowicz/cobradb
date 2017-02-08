@@ -95,14 +95,14 @@ class GenomeRegion(Base):
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
     chromosome_id = Column(Integer, ForeignKey('chromosome.id'))
-    bigg_id = Column(String, nullable=False)
+    cobra_id = Column(String, nullable=False)
     leftpos = Column(Integer, nullable=True)
     rightpos = Column(Integer, nullable=True)
     strand = Column(String(1), nullable=True)
     type = Column(String(20))
 
     __table_args__ = (
-        UniqueConstraint('bigg_id', 'chromosome_id'),
+        UniqueConstraint('cobra_id', 'chromosome_id'),
     )
 
     __mapper_args__ = {
@@ -119,11 +119,11 @@ class Component(Base):
     __tablename__ = 'component'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
-    bigg_id = Column(String)
+    cobra_id = Column(String)
     name = Column(String, nullable=True)
     type = Column(String(20))
 
-    __table_args__ = (UniqueConstraint('bigg_id'), {})
+    __table_args__ = (UniqueConstraint('cobra_id'), {})
 
     __mapper_args__ = {
         'polymorphic_identity': 'component',
@@ -140,13 +140,13 @@ class Reaction(Base):
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
     type = Column(String(20))
-    bigg_id = Column(String, nullable=False)
+    cobra_id = Column(String, nullable=False)
     name = Column(String, nullable=True)
     reaction_hash = Column(String, nullable=False)
     pseudoreaction = Column(Boolean, default=False)
 
     __table_args__ = (
-        UniqueConstraint('bigg_id'),
+        UniqueConstraint('cobra_id'),
     )
 
     __mapper_args__ = {
@@ -155,25 +155,25 @@ class Reaction(Base):
     }
 
     def __repr__(self):
-        return ('<ome Reaction(id=%d, bigg_id=%s%s)>' %
-                (self.id, self.bigg_id, ', pseudoreaction' if self.pseudoreaction else ''))
+        return ('<ome Reaction(id=%d, cobra_id=%s%s)>' %
+                (self.id, self.cobra_id, ', pseudoreaction' if self.pseudoreaction else ''))
 
 
 class DataSource(Base):
     __tablename__ = 'data_source'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
-    bigg_id = Column(String, nullable=False)
+    cobra_id = Column(String, nullable=False)
     name = Column(String(100))
     url_prefix = Column(String)
 
     __table_args__ = (
-        UniqueConstraint('bigg_id'),
+        UniqueConstraint('cobra_id'),
     )
 
     def __repr__(self):
         return (
-            '<ome DataSource(id={self.id}, bigg_id={self.bigg_id}, '
+            '<ome DataSource(id={self.id}, cobra_id={self.cobra_id}, '
             'name={self.name}, url_prefix={self.url_prefix})>'
         ).format(self=self)
 

@@ -348,8 +348,8 @@ def convert_ids(model):
                          if len(gene.reactions) == 0])
 
     # fix the model id
-    bigg_id = re.sub(r'[^a-zA-Z0-9_]', '_', model.id)
-    model.id = bigg_id
+    cobra_id = re.sub(r'[^a-zA-Z0-9_]', '_', model.id)
+    model.id = cobra_id
 
     old_ids = {'metabolites': metabolite_id_dict,
                'reactions': reaction_id_dict,
@@ -515,12 +515,12 @@ def fix_legacy_id(id, use_hyphens=False):
     return id
 
 def split_compartment(component_id):
-    """Split the metabolite bigg_id into a metabolite and a compartment id.
+    """Split the metabolite cobra_id into a metabolite and a compartment id.
 
     Arguments
     ---------
 
-    component_id: the bigg_id of the metabolite.
+    component_id: the cobra_id of the metabolite.
 
     """
     match = re.search(r'_[a-z][a-z0-9]?$', component_id)

@@ -171,7 +171,7 @@ def load_chromosome(gb_file, genome_db, session):
     if genome_db.organism is None:
         genome_db.organism = gb_file.annotations['organism']
 
-    bigg_id_warnings = 0
+    cobra_id_warnings = 0
     duplicate_genes_warnings = 0
     warning_num = 5
     for i, feature in enumerate(gb_file.features):
@@ -188,8 +188,8 @@ def load_chromosome(gb_file, genome_db, session):
         if feature.type != 'CDS':
             continue
 
-        # bigg_id required
-        bigg_id = None
+        # cobra_id required
+        cobra_id = None
         gene_name = None
         refseq_name = None
         locus_tag = None
@@ -197,30 +197,30 @@ def load_chromosome(gb_file, genome_db, session):
         t = _get_qual(feature, 'locus_tag', True)
         if t is not None:
             locus_tag = t
-            bigg_id = scrub_gene_id(t)
+            cobra_id = scrub_gene_id(t)
 
         t = _get_qual(feature, 'gene', True)
         if t is not None:
             gene_name = t
             refseq_name = t
 
-        if gene_name is not None and bigg_id is None:
-            if bigg_id_warnings <= warning_num:
-                msg = 'No locus_tag for gene. Using Gene name as bigg_id: %s' % gene_name
-                if bigg_id_warnings == warning_num:
+        if gene_name is not None and cobra_id is None:
+            if cobra_id_warnings <= warning_num:
+                msg = 'No locus_tag for gene. Using Gene name as cobra_id: %s' % gene_name
+                if cobra_id_warnings == warning_num:
                     msg += ' (Warnings limited to %d)' % warning_num
                 logging.warn(msg)
-                bigg_id_warnings += 1
-            bigg_id = scrub_gene_id(gene_name)
-            gene_name = bigg_id
-        elif bigg_id is None:
+                cobra_id_warnings += 1
+            cobra_id = scrub_gene_id(gene_name)
+            gene_name = cobra_id
+        elif cobra_id is None:
             logging.error(('No locus_tag or gene name for gene %d in chromosome '
                            '%s' % (i, chromosome.ncbi_accession)))
             continue
 
         gene_db = (session
                    .query(Gene)
-                   .filter(Gene.bigg_id == bigg_id)
+                   .filter(Gene.cobra_id == cobra_id)
                    .filter(Gene.chromosome_id == chromosome.id)
                    .first())
         if gene_db is None:
@@ -234,7 +234,7 @@ def load_chromosome(gb_file, genome_db, session):
             rightpos = int(feature.location.end)
 
             # finally, create the gene
-            gene_db = Gene(bigg_id=bigg_id,
+            gene_db = Gene(cobra_id=cobra_id,
                            locus_tag=locus_tag,
                            chromosome_id=chromosome.id,
                            name=gene_name,
@@ -251,7 +251,7 @@ def load_chromosome(gb_file, genome_db, session):
             # leftpos and rightpos correspond to a CDS, not the whole gene. So
             # these need to be fixed eventually.
             if duplicate_genes_warnings <= warning_num:
-                msg = 'Duplicate genes %s on chromosome %s' % (bigg_id, chromosome.id)
+                msg = 'Duplicate genes %s on chromosome %s' % (cobra_id, chromosome.id)
                 if duplicate_genes_warnings == warning_num:
                     msg += ' (Warnings limited to %d)' % warning_num
                 logging.warn(msg)

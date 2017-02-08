@@ -12,18 +12,18 @@ class Model(Base):
     __tablename__ = 'model'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
-    bigg_id = Column(String, nullable=False)
+    cobra_id = Column(String, nullable=False)
     genome_id = Column(Integer, ForeignKey('genome.id', onupdate="CASCADE", ondelete="CASCADE"))
     genome = relationship('Genome', backref='model')
     organism = Column(String(200), nullable=True)
     published_filename = Column(String, nullable=True)
 
     __table_args__ = (
-        UniqueConstraint('bigg_id', 'genome_id'),
+        UniqueConstraint('cobra_id', 'genome_id'),
     )
 
     def __repr__(self):
-        return '<ome Model(id={self.id}, bigg_id={self.bigg_id})>'.format(self=self)
+        return '<ome Model(id={self.id}, cobra_id={self.cobra_id})>'.format(self=self)
 
 
 class ModelGene(Base):
@@ -128,11 +128,11 @@ class Compartment(Base):
     __tablename__ = 'compartment'
 
     id = Column(Integer, Sequence('wids'), primary_key=True)
-    bigg_id = Column(String, unique=True)
+    cobra_id = Column(String, unique=True)
     name = Column(String)
 
     def __repr__(self):
-        return ('<ome Compartment(id={self.id}, bigg_id={self.bigg_id})>'
+        return ('<ome Compartment(id={self.id}, cobra_id={self.cobra_id})>'
                 .format(self=self))
 
 

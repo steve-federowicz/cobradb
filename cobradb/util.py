@@ -70,13 +70,13 @@ def load_tsv(filename, required_column_num=None):
     return rows
 
 
-def _find_data_source_url(bigg_id, url_prefs):
-    """Return (bigg_id, name, url prefix) for data source name."""
+def _find_data_source_url(cobra_id, url_prefs):
+    """Return (cobra_id, name, url prefix) for data source name."""
     name = None
     url_prefix = None
 
     for row in url_prefs:
-        if row[0] == bigg_id:
+        if row[0] == cobra_id:
             if len(row) == 1:
                 logging.error('Bad row in data-source-prefs: {}'.format(row))
             if len(row) > 1:
@@ -85,13 +85,13 @@ def _find_data_source_url(bigg_id, url_prefs):
                 url_prefix = check_none(row[2])
             break
         # check synonyms
-        elif len(row) == 4 and bigg_id in (x.strip() for x in row[3].split(',')):
-            bigg_id, name, url_prefix = row[0], check_none(row[1]), check_none(row[2])
+        elif len(row) == 4 and cobra_id in (x.strip() for x in row[3].split(',')):
+            cobra_id, name, url_prefix = row[0], check_none(row[1]), check_none(row[2])
             break
-    return bigg_id, name, url_prefix
+    return cobra_id, name, url_prefix
 
 
-def get_or_create_data_source(session, bigg_id):
+def get_or_create_data_source(session, cobra_id):
     """Get the data source by name. If it does not exist in the database, then
     add a new row by reading the preference file.
 
@@ -100,27 +100,27 @@ def get_or_create_data_source(session, bigg_id):
 
     session: The SQLAlchemy session.
 
-    bigg_id: The BiGG ID of the DataSource.
+    cobra_id: The BiGG ID of the DataSource.
 
     """
     data_source_db = (session
                       .query(DataSource)
-                      .filter(DataSource.bigg_id == bigg_id)
+                      .filter(DataSource.cobra_id == cobra_id)
                       .first())
     if not data_source_db:
         # get gene url_prefs
         url_prefs = load_tsv(settings.data_source_preferences)
-        bigg_id, name, url_prefix = _find_data_source_url(bigg_id, url_prefs)
+        cobra_id, name, url_prefix = _find_data_source_url(cobra_id, url_prefs)
         # data source may already exist if this is a synonym
         data_source_db, exists = get_or_create(session, DataSource,
-                                               bigg_id=bigg_id,
+                                               cobra_id=cobra_id,
                                                name=name,
                                                url_prefix=url_prefix)
         if not exists:
             if name is None:
-                logging.warning('No name found for data source %s', bigg_id)
+                logging.warning('No name found for data source %s', cobra_id)
             if url_prefix is None:
-                logging.warning('No URL found for data source %s', bigg_id)
+                logging.warning('No URL found for data source %s', cobra_id)
     return data_source_db.id
 
 
@@ -132,8 +132,8 @@ def increment_id(id, increment_name=''):
         return '%s_%s%d' % (id, increment_name, 1)
 
 
-def make_reaction_copy_id(bigg_id, copy_number):
-    return '{}_copy{}'.format(bigg_id, copy_number)
+def make_reaction_copy_id(cobra_id, copy_number):
+    return '{}_copy{}'.format(cobra_id, copy_number)
 
 
 def check_pseudoreaction(reaction_id):

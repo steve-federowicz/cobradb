@@ -1,6 +1,7 @@
 """Module to implement ORM for the experimental portion of the OME database"""
 
 from cobradb.base import (Base, DataSource, Session)
+from cobradb.util import get_or_create
 
 from sqlalchemy.orm import relationship, backref, column_property
 from sqlalchemy import Table, MetaData, create_engine, Column, Integer, \
@@ -11,7 +12,6 @@ from sqlalchemy.schema import UniqueConstraint, Sequence
 from sqlalchemy.sql.expression import join
 from sqlalchemy import func
 from sqlalchemy.types import JSON, Text
-
 
 
 from math import ceil
@@ -32,7 +32,7 @@ class Dataset(Base):
     type = Column(String(40))
 
     group_name = Column(Text)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)
 
     data_source_id = Column(Integer, ForeignKey('data_source.id', ondelete='CASCADE'))
     data_source = relationship("DataSource")
@@ -47,20 +47,19 @@ class Dataset(Base):
             (self.id, self.name)
 
 
-    def __init__(self, name, data_source_id=None, group_name=None, metadata=None):
+    def __init__(self, name, data_source_id=None, group_name=None, meta_data=None):
 
         session = Session()
         if data_source_id is None:
-            data_source_id = session.get_or_create(DataSource,
-                                                   bigg_id='-1',
-                                                   name='generic',
-                                                   url_prefix='')
+            data_source, exists = get_or_create(session, DataSource, cobra_id='-1',
+                                                name='generic', url_prefix='')
+            data_source_id = data_source.id
         session.close()
 
         self.name = name
         self.data_source_id = data_source_id
         self.group_name = group_name
-        self.metadata = metadata
+        self.meta_data = meta_data
 
 
 class AnalysisComposition(Base):
@@ -96,8 +95,8 @@ class Analysis(Dataset):
     __mapper_args__ = {'polymorphic_identity': 'analysis',
                        'polymorphic_on': 'type'}
 
-    def __init__(self, name, group_name=None, metadata=None):
-        super(Analysis, self).__init__(name, group_name=group_name, metadata=metadata)
+    def __init__(self, name, group_name=None, meta_data=None):
+        super(Analysis, self).__init__(name, group_name=group_name, meta_data=meta_data)
 
     def __repr__(self):
         return "Analysis (#%d):  %s" % \

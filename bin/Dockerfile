@@ -38,8 +38,6 @@ RUN cd cobradb && \
 ADD cobradb/cobradb/settings.ini /cobradb/cobradb/settings.ini
 ADD cobradb/bin/start.sh /cobradb/bin/start.sh
 
-ADD cobra_data /cobra_data
-
 RUN pip install ./cobradb
 
 RUN pip install jupyter cobra pandas simplejson

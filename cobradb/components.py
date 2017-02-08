@@ -23,8 +23,8 @@ class Gene(GenomeRegion):
     __mapper_args__ = {'polymorphic_identity': 'gene'}
 
     def __repr__(self):
-        return '<cobradb Gene(id=%d, bigg_id=%s, name=%s)>' % \
-                (self.id, self.bigg_id, self.name)
+        return '<cobradb Gene(id=%d, cobra_id=%s, name=%s)>' % \
+                (self.id, self.cobra_id, self.name)
 
 
 class ComplexComposition(Base):
@@ -71,7 +71,7 @@ class Complex(Component):
 
     def __repr__(self):
         return "Complex (#%d):  %s" % \
-            (self.id, self.bigg_id)
+            (self.id, self.cobra_id)
 
 
 class DNA(Component):
@@ -88,8 +88,8 @@ class DNA(Component):
         'polymorphic_on': dna_type
     }
 
-    def __init__(self, bigg_id, name, leftpos=None, rightpos=None, strand=None, chromosome_id=None):
-        super(DNA, self).__init__(bigg_id, name)
+    def __init__(self, cobra_id, name, leftpos=None, rightpos=None, strand=None, chromosome_id=None):
+        super(DNA, self).__init__(cobra_id, name)
         session = Session()
         self.genome_region_id = session.get_or_create(GenomeRegion, name=name,
                                                       leftpos=leftpos,
@@ -99,7 +99,7 @@ class DNA(Component):
         session.close()
 
     def __repr__(self):
-        return ("DNA (#%d, %s) %d-%d %s" % (self.id, self.bigg_id,
+        return ("DNA (#%d, %s) %d-%d %s" % (self.id, self.cobra_id,
                                             self.genome_region.leftpos,
                                             self.genome_region.rightpos,
                                             self.genome_region.strand))
@@ -114,8 +114,8 @@ class RNA(Component):
 
     __mapper_args__ = {'polymorphic_identity': 'rna'}
 
-    def __init__(self, bigg_id, name, leftpos=None, rightpos=None, strand=None, chromosome_id=None):
-        super(RNA, self).__init__(bigg_id, name)
+    def __init__(self, cobra_id, name, leftpos=None, rightpos=None, strand=None, chromosome_id=None):
+        super(RNA, self).__init__(cobra_id, name)
         session = Session()
         self.genome_region_id = session.get_or_create(GenomeRegion, name=name, leftpos=leftpos,\
                                                       rightpos=rightpos, strand=strand,
@@ -124,7 +124,7 @@ class RNA(Component):
 
     def __repr__(self):
         return "RNA (#%d, %s)" % \
-            (self.id, self.bigg_id)
+            (self.id, self.cobra_id)
 
 
 class Protein(Component):
@@ -147,7 +147,7 @@ class Metabolite(Component):
                 primary_key=True)
 
     def __repr__(self):
-        return ('<cobradb Metabolite(id={self.id}, bigg_id={self.bigg_id}>'
+        return ('<cobradb Metabolite(id={self.id}, cobra_id={self.cobra_id}>'
                 .format(self=self))
 
 

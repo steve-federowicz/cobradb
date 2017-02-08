@@ -28,18 +28,18 @@ def load_maps_from_server(session, drop_maps=False):
     index = escher.plots.server_index()
 
     loaded_models = (session
-                     .query(Model.bigg_id, Model.id)
+                     .query(Model.cobra_id, Model.id)
                      .all())
     matching_models = [x for x in loaded_models
                        if x[0] in [m['model_name'] for m in index['models']]
                           # TODO remove: trick for matching E coli core to e_coli_core
                           or x[0] == 'e_coli_core' and 'E coli core' in [m['model_name'] for m in index['models']]]
 
-    for model_bigg_id, model_id in matching_models:
+    for model_cobra_id, model_id in matching_models:
         maps = [(m['map_name'], m['organism']) for m in index['maps'] if
-                m['map_name'].split('.')[0] == model_bigg_id or
+                m['map_name'].split('.')[0] == model_cobra_id or
                 # TODO remove: trick for matching E coli core to e_coli_core
-                m['map_name'].split('.')[0] == 'E coli core' and model_bigg_id == 'e_coli_core']
+                m['map_name'].split('.')[0] == 'E coli core' and model_cobra_id == 'e_coli_core']
         for map_name, org in maps:
             map_json = escher.plots.map_json_for_name(map_name)
             load_the_map(session, model_id, map_name, map_json)
@@ -71,12 +71,12 @@ def load_the_map(session, model_id, map_name, map_json):
     else:
         logging.info('Map %s already in the database' % map_name)
         if escher_map_db.model_id != model_id:
-            model_bigg_id = (session
-                             .query(Model.bigg_id)
+            model_cobra_id = (session
+                             .query(Model.cobra_id)
                              .filter(Model.id == model_id)
                              .first())[0]
             logging.warn('Map %s does not match model %s' % (map_name,
-                                                             model_bigg_id))
+                                                             model_cobra_id))
 
     map_object = json.loads(map_json)
 
@@ -84,26 +84,26 @@ def load_the_map(session, model_id, map_name, map_json):
     reaction_warnings = 0
     for element_id, reaction in six.iteritems(map_object[1]['reactions']):
         # deal with reaction copies
-        map_reaction_bigg_id = re.sub(r'_copy[0-9]+$', '', reaction['bigg_id'])
+        map_reaction_cobra_id = re.sub(r'_copy[0-9]+$', '', reaction['cobra_id'])
         # check for an existing mat row
         mat_db = (session
                   .query(EscherMapMatrix)
                   .join(ModelReaction, ModelReaction.id == EscherMapMatrix.ome_id)
                   .join(Reaction)
                   .filter(EscherMapMatrix.escher_map_id == escher_map_db.id)
-                  .filter(Reaction.bigg_id == map_reaction_bigg_id)
+                  .filter(Reaction.cobra_id == map_reaction_cobra_id)
                   .first())
         if mat_db is None:
             # find the model reaction
             model_reaction_db = (session
                                  .query(ModelReaction.id)
                                  .join(Reaction)
-                                 .filter(Reaction.bigg_id == map_reaction_bigg_id)
+                                 .filter(Reaction.cobra_id == map_reaction_cobra_id)
                                  .filter(ModelReaction.model_id == model_id)
                                  .first())
             if model_reaction_db is None:
                 if reaction_warnings <= warning_num:
-                    msg = ('Could not find reaction %s in model for map %s' % (map_reaction_bigg_id,
+                    msg = ('Could not find reaction %s in model for map %s' % (map_reaction_cobra_id,
                                                                                map_name))
                     if reaction_warnings == warning_num:
                         msg += ' (Warnings limited to %d)' % warning_num
@@ -124,11 +124,11 @@ def load_the_map(session, model_id, map_name, map_json):
             continue
         metabolite = node
 
-        # split the bigg_id
+        # split the cobra_id
         try:
-            met_id, comp_id = parse.split_compartment(metabolite['bigg_id'])
+            met_id, comp_id = parse.split_compartment(metabolite['cobra_id'])
         except Exception:
-            logging.warn('Could not split compartment for metabolite %s' % metabolite['bigg_id'])
+            logging.warn('Could not split compartment for metabolite %s' % metabolite['cobra_id'])
         # check for an existing mat row
         mat_db = (session
                   .query(EscherMapMatrix)
@@ -141,8 +141,8 @@ def load_the_map(session, model_id, map_name, map_json):
                   .join(Compartment,
                         Compartment.id == CompartmentalizedComponent.compartment_id)
                   .filter(EscherMapMatrix.escher_map_id == escher_map_db.id)
-                  .filter(Metabolite.bigg_id == met_id)
-                  .filter(Compartment.bigg_id == comp_id)
+                  .filter(Metabolite.cobra_id == met_id)
+                  .filter(Compartment.cobra_id == comp_id)
                   .first())
         if mat_db is None:
             # find the compartmentalized compartment
@@ -155,8 +155,8 @@ def load_the_map(session, model_id, map_name, map_json):
                                   .join(Compartment,
                                         Compartment.id == CompartmentalizedComponent.compartment_id)
                                   .join(Model)
-                                  .filter(Compartment.bigg_id == comp_id)
-                                  .filter(Metabolite.bigg_id == met_id)
+                                  .filter(Compartment.cobra_id == comp_id)
+                                  .filter(Metabolite.cobra_id == met_id)
                                   .filter(Model.id == model_id)
                                   .first())
             if model_comp_comp_db is None:
