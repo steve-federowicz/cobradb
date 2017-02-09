@@ -1,44 +1,40 @@
 # -*- coding: utf-8 -*-
 
-from cobradb import base, settings, components
-from cobradb.base import Session
-from cobradb.models import *
+import logging
+import six
+import cobra
+
+from cobradb.base import Session, OldIDSynonym, Synonym, Reaction, Component
+from cobradb.models import (Model, ModelGene, ModelReaction, ModelCompartmentalizedComponent,
+                            Compartment, CompartmentalizedComponent, ReactionMatrix)
+from cobradb.components import Gene, Metabolite
 from cobradb.util import increment_id, make_reaction_copy_id, timing
 
-import cobra.core
-import logging
-from itertools import repeat
 from collections import defaultdict
-from copy import copy
-import six
 
-try:
-    from ipy_progressbar import ProgressBar
-except ImportError:
-    pass
 
 @timing
-def dump_model(bigg_id):
+def dump_model(cobra_id):
     session = Session()
 
     # find the model
     model_db = (session
                 .query(Model)
-                .filter(Model.bigg_id == bigg_id)
+                .filter(Model.cobra_id == cobra_id)
                 .first())
 
     if model_db is None:
         session.commit()
         session.close()
-        raise Exception('Could not find model %s' % bigg_id)
+        raise Exception('Could not find model %s' % cobra_id)
 
-    model = cobra.core.Model(bigg_id)
+    model = cobra.core.Model(cobra_id)
 
     # genes
     logging.debug('Dumping genes')
     # get genes and original bigg ids (might be multiple)
     genes_db = (session
-                .query(Gene.bigg_id, Gene.name, Synonym.synonym)
+                .query(Gene.cobra_id, Gene.name, Synonym.synonym)
                 .join(ModelGene, ModelGene.gene_id == Gene.id)
                 .join(OldIDSynonym, OldIDSynonym.ome_id == ModelGene.id)
                 .join(Synonym, Synonym.id == OldIDSynonym.synonym_id)
@@ -53,7 +49,7 @@ def dump_model(bigg_id):
     for gene_id, gene_name in gene_names:
         gene = cobra.core.Gene(gene_id)
         gene.name = gene_name
-        gene.notes = {'original_bigg_ids': old_gene_ids_dict[gene_id]}
+        gene.notes = {'original_cobra_ids': old_gene_ids_dict[gene_id]}
         model.genes.append(gene)
 
     # reactions
@@ -69,40 +65,40 @@ def dump_model(bigg_id):
     found_model_reactions = set()
     old_reaction_ids_dict = defaultdict(list)
     for model_reaction, reaction, old_id in reactions_db:
-        # there may be multiple model reactions for a given bigg_id
+        # there may be multiple model reactions for a given cobra_id
         if model_reaction.id not in found_model_reactions:
             reactions_model_reactions.append((model_reaction, reaction))
             found_model_reactions.add(model_reaction.id)
-        old_reaction_ids_dict[reaction.bigg_id].append(old_id)
+        old_reaction_ids_dict[reaction.cobra_id].append(old_id)
 
     # make dictionaries and cast results
     result_dicts = []
     for mr_db, r_db in reactions_model_reactions:
         d = {}
-        d['bigg_id'] = r_db.bigg_id
+        d['cobra_id'] = r_db.cobra_id
         d['name'] = r_db.name
         d['gene_reaction_rule'] = mr_db.gene_reaction_rule
         d['lower_bound'] = float(mr_db.lower_bound)
         d['upper_bound'] = float(mr_db.upper_bound)
         d['objective_coefficient'] = float(mr_db.objective_coefficient)
-        d['original_bigg_ids'] = old_reaction_ids_dict[r_db.bigg_id]
+        d['original_cobra_ids'] = old_reaction_ids_dict[r_db.cobra_id]
         d['subsystem'] = mr_db.subsystem
         d['copy_number'] = int(mr_db.copy_number)
         result_dicts.append(d)
 
     def filter_duplicates(result_dicts):
         """Find the reactions with multiple ModelReactions and increment names."""
-        tups_by_bigg_id = defaultdict(list)
+        tups_by_cobra_id = defaultdict(list)
         # for each ModelReaction
         for d in result_dicts:
             # add to duplicates
-            tups_by_bigg_id[d['bigg_id']].append(d)
+            tups_by_cobra_id[d['cobra_id']].append(d)
         # duplicates have multiple ModelReactions
-        duplicates = {k: v for k, v in six.iteritems(tups_by_bigg_id) if len(v) > 1}
-        for bigg_id, dup_dicts in six.iteritems(duplicates):
+        duplicates = {k: v for k, v in six.iteritems(tups_by_cobra_id) if len(v) > 1}
+        for cobra_id, dup_dicts in six.iteritems(duplicates):
             # add _copy1, copy2, etc. to the bigg ids for the duplicates
             for d in dup_dicts:
-                d['bigg_id'] = make_reaction_copy_id(bigg_id, d['copy_number'])
+                d['cobra_id'] = make_reaction_copy_id(cobra_id, d['copy_number'])
 
         return result_dicts
 
@@ -111,13 +107,13 @@ def dump_model(bigg_id):
 
     reactions = []
     for result_dict in result_filtered:
-        r = cobra.core.Reaction(result_dict['bigg_id'])
+        r = cobra.core.Reaction(result_dict['cobra_id'])
         r.name = result_dict['name']
         r.gene_reaction_rule = result_dict['gene_reaction_rule']
         r.lower_bound = result_dict['lower_bound']
         r.upper_bound = result_dict['upper_bound']
         r.objective_coefficient = result_dict['objective_coefficient']
-        r.notes = {'original_bigg_ids': result_dict['original_bigg_ids']}
+        r.notes = {'original_cobra_ids': result_dict['original_cobra_ids']}
         r.subsystem = result_dict['subsystem']
         reactions.append(r)
     model.add_reactions(reactions)
@@ -126,11 +122,11 @@ def dump_model(bigg_id):
     logging.debug('Dumping metabolites')
     # get original bigg ids (might be multiple)
     metabolites_db = (session
-                      .query(Metabolite.bigg_id,
+                      .query(Metabolite.cobra_id,
                              Metabolite.name,
                              ModelCompartmentalizedComponent.formula,
                              ModelCompartmentalizedComponent.charge,
-                             Compartment.bigg_id,
+                             Compartment.cobra_id,
                              Synonym.synonym)
                       .join(CompartmentalizedComponent)
                       .join(Compartment)
@@ -154,21 +150,21 @@ def dump_model(bigg_id):
                                       formula=formula)
             m.charge = charge
             m.name = component_name
-            m.notes = {'original_bigg_ids': old_metabolite_ids_dict[component_id + '_' + compartment_id]}
+            m.notes = {'original_cobra_ids': old_metabolite_ids_dict[component_id + '_' + compartment_id]}
             compartments.add(compartment_id)
             metabolites.append(m)
     model.add_metabolites(metabolites)
 
     # compartments
     compartment_db = (session.query(Compartment)
-                      .filter(Compartment.bigg_id.in_(compartments)))
-    model.compartments = {i.bigg_id: i.name for i in compartment_db}
+                      .filter(Compartment.cobra_id.in_(compartments)))
+    model.compartments = {i.cobra_id: i.name for i in compartment_db}
 
     # reaction matrix
     logging.debug('Dumping reaction matrix')
     matrix_db = (session
-                 .query(ReactionMatrix.stoichiometry, Reaction.bigg_id,
-                        Component.bigg_id, Compartment.bigg_id)
+                 .query(ReactionMatrix.stoichiometry, Reaction.cobra_id,
+                        Component.cobra_id, Compartment.cobra_id)
                  # component, compartment
                  .join(CompartmentalizedComponent)
                  .join(Component)
@@ -184,8 +180,8 @@ def dump_model(bigg_id):
         try:
             m = model.metabolites.get_by_id(component_id + '_' + compartment_id)
         except KeyError:
-            logging.warn('Metabolite not found %s in compartment %s for reaction %s' % \
-                         (component_id, compartment_id, reaction_id))
+            logging.warning('Metabolite not found %s in compartment %s for reaction %s' % \
+                            (component_id, compartment_id, reaction_id))
             continue
         # add to reactions
         if reaction_id in model.reactions:
