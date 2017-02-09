@@ -33,7 +33,7 @@ RUN git clone https://github.com/steve-federowicz/cobradb.git cobradb
 RUN cd cobradb && \
     git fetch origin docker && \
     git checkout docker && \
-    git merge 3e2d27598f0763eefc4f377db1466a931f6070ae
+    git merge bc29a1b5755631b38aff32f975c925971cb6557e
 
 ADD cobradb/cobradb/settings.ini /cobradb/cobradb/settings.ini
 ADD cobradb/bin/start.sh /cobradb/bin/start.sh

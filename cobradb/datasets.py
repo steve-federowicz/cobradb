@@ -104,7 +104,7 @@ class GenomeData(Base):
     __tablename__ = 'genome_data'
 
     dataset_id = Column(Integer, ForeignKey('dataset.id', ondelete="CASCADE"), primary_key=True)
-    dataset = relationship('Dataset')
+    dataset = relationship('Dataset', backref='data')
     genome_region_id = Column(Integer, ForeignKey('genome_region.id'), primary_key=True)
     genome_region = relationship('GenomeRegion', backref='data')
     value = Column(Float)
