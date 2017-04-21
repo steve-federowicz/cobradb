@@ -3,9 +3,9 @@ COBRAdb
 
 COBRAdb is a database for COBRA models, genomes, and biological datasets.
 
-##[Installation](INSTALL.md)
+## [Installation](INSTALL.md)
 
-###Its core features are 
+### Its core features are 
 
 1. map highthroughput experimental data to cellular components
 2. map cellular components to computational models
