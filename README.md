@@ -1,5 +1,5 @@
 COBRAdb
-==
+---
 
 COBRAdb is a database for COBRA models, genomes, and biological datasets.
 
@@ -14,7 +14,7 @@ COBRAdb is a database for COBRA models, genomes, and biological datasets.
 ![alt tag](https://raw.githubusercontent.com/steve-federowicz/om/master/docs/om_overview.png)
 
 
-==
+---
 
 The framework is written entirely in python with great help from [SQLalchemy](http://www.sqlalchemy.org/). You can browse the schemas below to get a sense of the underlying database design or jump straight to the examples page. Enjoy!
 
@@ -27,7 +27,7 @@ The framework is written entirely in python with great help from [SQLalchemy](ht
 <a href="https://www.draw.io/?url=https://raw.githubusercontent.com/steve-federowicz/cobradb/master/docs/combined_schema.xml#" target="_blank">combined schema</a>
 
 
-###Why COBRAdb?
+### Why COBRAdb?
 
 Most biological analyses and analysis tools are focused on working with a relatively limited subset of data concerned with a specific study or question of interest.  However, as the sequencing and synthesis of DNA surges ahead it becomes clear that we will soon generate 10 replicates instead of 3, cross reference 10 historic datasets instead of 1, and most importantly begin to get a level of quantitation that will enable true biological engineering.  
 
